@@ -1,0 +1,201 @@
+vSphere:
+  # -- Datacenter to use
+  dataCenter: "datacenter"
+  # -- VSphere server dns name or address
+  server: "server.sample.org"
+  # -- VSphere server port
+  port: 443
+  # -- If vCenter uses a self-signed cert
+  insecure: false
+  # -- VSphere https TLS thumbprint
+  tlsThumbprint: ""
+  # -- Create a secret with the VSphere credentials
+  secret:
+    # -- Specifies whether Secret should be created from config values
+    create: false
+    # -- The name of an existing Secret for vSphere. 
+    name: vsphere-secret
+  # -- vSphere username
+  username: "admin@vcenter"
+  # -- vSphere password
+  password: "changeme"
+
+ipamProvider:
+  # -- Enable the IPAMProvider usage
+  enabled: true
+  # -- IPAMProvider ranges
+  ranges:
+    - "192.168.0.0/24"
+  # -- IPAMProvider prefix
+  prefix: "24"
+  # -- IPAMProvider gateway
+  gateway: "192.168.0.1"
+
+cluster:
+  # -- Cluster name. If unset, the release name will be used
+  name: ""
+  controlPlane:
+    # -- Labels to add to the control plane
+    labels:
+      cni: calico
+    # -- Number of control plane replicas
+    replicas: 2
+    # -- extraArgs for the control plane components
+    apiServer:
+      extraArgs:
+        - --cloud-provider=external
+    controllerManager:
+      extraArgs:
+        - --cloud-provider=external
+    # -- KamajiControlPlane dataStoreName
+    dataStoreName: default
+    addons:
+      # -- KamajiControlPlane coreDNS configuration
+      coreDNS: {}
+      # -- KamajiControlPlane kube-proxy configuration
+      kubeProxy: {}
+      # -- KamajiControlPlane konnectivity configuration
+      konnectivity: {}
+    kubelet:
+      # -- kubelet cgroupfs configuration
+      cgroupfs: systemd
+      # -- kubelet preferredAddressTypes order
+      preferredAddressTypes:
+        - InternalIP
+        - ExternalIP
+        - Hostname
+    network:
+      # -- Ingress configuration (optional)
+      # ingress: {}
+      # -- Type of service used to expose the Kubernetes API server
+      serviceType: LoadBalancer
+      # -- Address used to expose the Kubernetes API server. If not set, the service will be exposed on the first available address.
+      serviceAddress: ""
+      # -- Annotations to use for the control plane service
+      serviceAnnotations: {}
+      # When using MetalLB to expose the Control Plane, set as the following to specify a specific IP address for the service
+      # serviceAddress: "10.9.62.25"
+      # serviceAnnotations:
+      #   metallb.universe.tf/loadBalancerIPs: "10.9.62.25"
+      # -- Labels to use for the control plane service
+      serviceLabels: {}
+      # -- List of additional Subject Alternative Names to use for the API Server serving certificate
+      certSANs: []
+    # -- Kubernetes version
+    version: v1.31.0
+  metrics:
+    # -- Enable metrics collection. ServiceMonitor custom resource definition must be installed on the Management cluster.
+    enabled: false
+    # -- ServiceAccount for scraping metrics
+    serviceAccount:
+      # -- ServiceAccount name used for scraping metrics
+      name: kube-prometheus-stack-prometheus
+      # -- ServiceAccount namespace
+      namespace: monitoring-system
+
+nodePools:
+  - name: default
+    # # -- Additional cloud-init files to pass to the machines
+    # additionalCloudInitFiles: |
+    #   #cloud-config
+    #   timezone: Europe/Rome
+    # -- VSphere datastore to use
+    dataStore: "datastore"
+    # -- VSphere folder to store VMs
+    folder: "default-pool"
+    # -- VSphere resource pool to use
+    resourcePool: "*/Resources"
+    # -- VSphere storage policy to use
+    storagePolicyName: ""
+    # -- VSphere template to clone
+    template: "ubuntu-2204-kube-v1.31.0"
+    # -- VSphere network for VMs and CSI
+    network: "network"
+    # -- Number of worker VMs instances
+    replicas: 3
+    autoscaling:
+      # -- Enable autoscaling
+      enabled: false
+      labels:
+        # -- Labels to use for autoscaling: make sure to use the same labels on the autoscaler configuration
+        autoscaling: "enabled"
+      # -- Minimum number of instances in the pool
+      minSize: "2"
+      # -- Maximum number of instances in the pool
+      maxSize: "6"
+    # -- Disk size of VM in GiB
+    diskGiB: 40
+    # -- Memory to allocate to worker VMs
+    memoryMiB: 4096
+    # -- Number of vCPUs to allocate to worker instances
+    numCPUs: 2
+    # -- Use dhcp for ipv4 configuration
+    dhcp4: false
+    # -- Use an IPAMProvider pool to reserve IPs
+    addressesFromPools:
+      # -- Enable the IPAMProvider usage
+      enabled: true
+    # -- Nameservers for VMs DNS resolution if required
+    nameServers:
+    - "8.8.8.8"
+    # # -- IP addresses to assign to the VMs if required
+    # ipAddrs: []
+    # -- Search domains suffixes if required
+    # searchDomains: []
+    # # -- VM network domain if required
+    # domain: ""
+    # # -- IPv4 gateway if required
+    # gateway: ""
+    # # -- users to create on machines
+    users:
+    - name: ubuntu
+      sshAuthorizedKeys: []
+      sudo: ALL=(ALL) NOPASSWD:ALL
+
+vSphereCloudControllerManager:
+  # -- Installs vsphere-cloud-controller-manager on the management cluster
+  enabled: true
+  secret:
+    # -- Specifies whether Secret should be created from config values
+    create: false
+    # -- The name of an existing Secret for vSphere. 
+    name: vsphere-config-secret
+  # -- vSphere username
+  username: "admin@vcenter"
+  # -- vSphere password
+  password: "changeme"
+  # -- Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release.
+  version: v1.31.0
+
+vSphereStorageControllerManager:
+  # -- Installs vsphere-storage-controller-manager on the management cluster. NB: CSI node drivers are always installed on the workload cluster.
+  enabled: false
+  # -- log level for the CSI components
+  logLevel: "PRODUCTION" # PRODUCTION, DEVELOPMENT
+  secret:
+    # -- Specifies whether Secret should be created from config values
+    create: false
+    # -- The name of an existing Secret for vSphere. 
+    name: csi-config-secret
+  # -- vSphere CSI username
+  username: "admin@vcenter"
+  # -- vSphere CSI password
+  password: "changeme"
+  # -- Target namespace for the vSphere CSI node drivers on the workload cluster
+  namespace: "kube-system"
+  storageClass:
+    # -- StorageClass enablement
+    enabled: false
+    # -- Name of the storage class
+    name: "vsphere-csi"
+    # -- Allow volume expansion
+    allowVolumeExpansion: true
+    # -- Reclaim policy
+    reclaimPolicy: Delete
+    # -- Volume binding mode
+    volumeBindingMode: WaitForFirstConsumer
+    # -- Optional storage class parameters
+    parameters: {}
+    #  storagepolicyname: DATASTORE_POLICY_NAME
+    # -- Configure as the default storage class
+    default: true

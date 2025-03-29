@@ -1,0 +1,24 @@
+{{- if and .Values.vSphereStorageControllerManager.enabled .Values.vSphereStorageControllerManager.storageClass.enabled }}
+---
+apiVersion: v1
+data:
+  data: |-
+    apiVersion: storage.k8s.io/v1
+    kind: StorageClass
+    metadata:
+      name: {{ .Values.vSphereStorageControllerManager.storageClass.name | quote }}
+      annotations:
+        storageclass.kubernetes.io/is-default-class: "{{ .Values.vSphereStorageControllerManager.storageClass.default }}"
+    provisioner: csi.vsphere.vmware.com
+    allowVolumeExpansion: {{ .Values.vSphereStorageControllerManager.storageClass.allowVolumeExpansion }}
+    reclaimPolicy: {{ .Values.vSphereStorageControllerManager.storageClass.reclaimPolicy }}
+    parameters: {{ .Values.vSphereStorageControllerManager.storageClass.parameters | toYaml | nindent 6 }}
+    volumeBindingMode: {{ .Values.vSphereStorageControllerManager.storageClass.volumeBindingMode }}
+kind: ConfigMap
+metadata:
+  labels:
+    component: csi-storage-class
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-storageclass
+  namespace: {{ .Release.Namespace }}
+{{- end }}

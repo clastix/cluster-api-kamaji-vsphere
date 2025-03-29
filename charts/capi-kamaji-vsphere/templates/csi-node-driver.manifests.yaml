@@ -1,0 +1,331 @@
+{{- if .Values.vSphereStorageControllerManager.enabled }}
+---
+
+apiVersion: config.projectsveltos.io/v1beta1
+kind: Profile
+metadata:
+  labels:
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-sveltos-profile
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusterSelector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  syncMode: ContinuousWithDriftDetection
+  stopMatchingBehavior: LeavePolicies
+  maxConsecutiveFailures: 5
+  policyRefs:
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-namespace
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-serviceaccount-node
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-clusterrole-node
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-clusterrolebinding-node
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-role-node
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-rolebinding-node
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-configmap-featurestates
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-daemonset-node
+  - kind: ConfigMap
+    name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-storageclass
+---
+apiVersion: v1
+data:
+  data: |-
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: {{ .Values.vSphereStorageControllerManager.namespace }}
+kind: ConfigMap
+metadata:
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-namespace
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  data: |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: vsphere-csi-node
+      namespace: {{ .Values.vSphereStorageControllerManager.namespace }}
+kind: ConfigMap
+metadata:
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-serviceaccount-node
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  data: |-
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: vsphere-csi-node-cluster-role
+    rules:
+      - apiGroups: ["cns.vmware.com"]
+        resources: ["csinodetopologies"]
+        verbs: ["create", "watch", "get", "patch"]
+      - apiGroups: [""]
+        resources: ["nodes"]
+        verbs: ["get"]
+kind: ConfigMap
+metadata:
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-clusterrole-node
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  data: |-
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: vsphere-csi-node-cluster-role-binding
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: vsphere-csi-node-cluster-role
+    subjects:
+    - kind: ServiceAccount
+      name: vsphere-csi-node
+      namespace: {{ .Values.vSphereStorageControllerManager.namespace }}
+kind: ConfigMap
+metadata:
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-clusterrolebinding-node
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  data: |-
+    kind: Role
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: vsphere-csi-node-role
+      namespace: {{ .Values.vSphereStorageControllerManager.namespace }}
+    rules:
+      - apiGroups: [""]
+        resources: ["configmaps"]
+        verbs: ["get", "list", "watch"]
+kind: ConfigMap
+metadata:
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-role-node
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  data: |-
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: vsphere-csi-node-binding
+      namespace: {{ .Values.vSphereStorageControllerManager.namespace }}
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: vsphere-csi-node-role
+    subjects:
+    - kind: ServiceAccount
+      name: vsphere-csi-node
+      namespace: {{ .Values.vSphereStorageControllerManager.namespace }}
+kind: ConfigMap
+metadata:
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-rolebinding-node
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-configmap-featurestates
+  namespace: {{ .Release.Namespace }}
+data:
+  data: |-
+    apiVersion: v1
+    data:
+      pv-to-backingdiskobjectid-mapping: "false"
+      trigger-csi-fullsync: "false"
+    kind: ConfigMap
+    metadata:
+      name: internal-feature-states.csi.vsphere.vmware.com
+      namespace: {{ .Values.vSphereStorageControllerManager.namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    component: csi-node-driver
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-csi-daemonset-node
+  namespace: {{ .Release.Namespace }}
+data:
+  data: |-
+    apiVersion: apps/v1
+    kind: DaemonSet
+    metadata:
+      name: vsphere-csi-node
+      namespace: {{ .Values.vSphereStorageControllerManager.namespace }}
+    spec:
+      selector:
+        matchLabels:
+          app: vsphere-csi-node
+      updateStrategy:
+        type: "RollingUpdate"
+        rollingUpdate:
+          maxUnavailable: 1
+      template:
+        metadata:
+          labels:
+            app: vsphere-csi-node
+            role: vsphere-csi
+        spec:
+          priorityClassName: system-node-critical
+          nodeSelector:
+            kubernetes.io/os: linux
+          serviceAccountName: vsphere-csi-node
+          hostNetwork: true
+          dnsPolicy: "ClusterFirstWithHostNet"
+          containers:
+            - name: node-driver-registrar
+              image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.12.0
+              args:
+                - "--csi-address=$(ADDRESS)"
+                - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
+              env:
+                - name: ADDRESS
+                  value: /csi/csi.sock
+                - name: DRIVER_REG_SOCK_PATH
+                  value: /var/lib/kubelet/plugins/csi.vsphere.vmware.com/csi.sock
+              volumeMounts:
+                - name: plugin-dir
+                  mountPath: /csi
+                - name: registration-dir
+                  mountPath: /registration
+              livenessProbe:
+                exec:
+                  command:
+                  - /csi-node-driver-registrar
+                  - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.vsphere.vmware.com/csi.sock
+                  - --mode=kubelet-registration-probe
+                initialDelaySeconds: 3
+            - name: vsphere-csi-node
+              image: us-central1-docker.pkg.dev/k8s-staging-images/csi-vsphere/driver:latest
+              args:
+                - "--fss-name=internal-feature-states.csi.vsphere.vmware.com"
+                - "--fss-namespace=$(CSI_NAMESPACE)"
+              imagePullPolicy: "Always"
+              env:
+                - name: NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
+                - name: CSI_ENDPOINT
+                  value: unix:///csi/csi.sock
+                - name: MAX_VOLUMES_PER_NODE
+                  value: "59"
+                - name: X_CSI_MODE
+                  value: "node"
+                - name: X_CSI_SPEC_REQ_VALIDATION
+                  value: "false"
+                - name: X_CSI_SPEC_DISABLE_LEN_CHECK
+                  value: "true"
+                - name: LOGGER_LEVEL
+                  value: "${CSI_LOG_LEVEL}" # Options: DEVELOPMENT, PRODUCTION
+                - name: CSI_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: NODEGETINFO_WATCH_TIMEOUT_MINUTES
+                  value: "1"
+              securityContext:
+                privileged: true
+                capabilities:
+                  add: ["SYS_ADMIN"]
+                allowPrivilegeEscalation: true
+              volumeMounts:
+                - name: plugin-dir
+                  mountPath: /csi
+                - name: pods-mount-dir
+                  mountPath: /var/lib/kubelet
+                  # needed so that any mounts setup inside this container are
+                  # propagated back to the host machine.
+                  mountPropagation: "Bidirectional"
+                - name: device-dir
+                  mountPath: /dev
+                - name: blocks-dir
+                  mountPath: /sys/block
+                - name: sys-devices-dir
+                  mountPath: /sys/devices
+              ports:
+                - name: healthz
+                  containerPort: 9808
+                  protocol: TCP
+              livenessProbe:
+                httpGet:
+                  path: /healthz
+                  port: healthz
+                initialDelaySeconds: 10
+                timeoutSeconds: 5
+                periodSeconds: 5
+                failureThreshold: 3
+            - name: liveness-probe
+              image: registry.k8s.io/sig-storage/livenessprobe:v2.14.0
+              args:
+                - "--csi-address=/csi/csi.sock"
+              volumeMounts:
+                - name: plugin-dir
+                  mountPath: /csi
+          volumes:
+            - name: registration-dir
+              hostPath:
+                path: /var/lib/kubelet/plugins_registry
+                type: Directory
+            - name: plugin-dir
+              hostPath:
+                path: /var/lib/kubelet/plugins/csi.vsphere.vmware.com
+                type: DirectoryOrCreate
+            - name: pods-mount-dir
+              hostPath:
+                path: /var/lib/kubelet
+                type: Directory
+            - name: device-dir
+              hostPath:
+                path: /dev
+            - name: blocks-dir
+              hostPath:
+                path: /sys/block
+                type: Directory
+            - name: sys-devices-dir
+              hostPath:
+                path: /sys/devices
+                type: Directory
+          tolerations:
+            - effect: NoExecute
+              operator: Exists
+            - effect: NoSchedule
+              operator: Exists
+{{- end }}

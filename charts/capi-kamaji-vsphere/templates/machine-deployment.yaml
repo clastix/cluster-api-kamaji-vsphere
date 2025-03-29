@@ -1,0 +1,48 @@
+{{- range .Values.nodePools }}
+---
+kind: MachineDeployment
+apiVersion: cluster.x-k8s.io/v1beta1
+metadata:
+  {{- with .autoscaling }}
+  {{- if .enabled }}
+  annotations:
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: {{ .minSize | quote }}
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: {{ .maxSize | quote }}
+  {{- end }}
+  {{- end }}
+  labels:
+    {{- with .autoscaling }}
+    {{- if .enabled }}
+    {{- .labels | toYaml | nindent 4 }}
+    {{- end }}
+    {{- end }}
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ }}-{{ .name }}-md
+  namespace: {{ $.Release.Namespace }}
+spec:
+  clusterName: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels: {}
+  template:
+    metadata:
+      labels:
+        {{- with .autoscaling }}
+        {{- if .enabled }}
+        {{- .labels | toYaml | nindent 8 }}
+        {{- end }}
+        {{- end }}
+        cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ }}-{{ .name }}-kubeadmconfig-{{ include "kubeadmConfigTemplateHash" (dict "nodePool" .) }}
+      clusterName: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: VSphereMachineTemplate
+        name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ }}-{{ .name }}-vsphere-machine-template-{{ include "vSphereMachineTemplateHash" (dict "nodePool" . "Global" $) }}
+      version: {{ $.Values.cluster.controlPlane.version | quote }}
+{{- end }}

@@ -1,0 +1,105 @@
+{{- if .Values.vSphereCloudControllerManager.enabled }}
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-cloud-controller-manager
+  labels:
+    component: cloud-controller-manager
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  namespace: {{ .Release.Namespace }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    component: cloud-controller-manager
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-{{ .Release.Namespace }}:apiserver-authentication-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-cloud-controller-manager
+  namespace: {{ .Release.Namespace }}
+- apiGroup: ""
+  kind: User
+  name: cloud-controller-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: cloud-controller-manager
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+  name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-vsphere-cloud-controller-manager
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-vsphere-cloud-controller-manager
+  template:
+    metadata:
+      labels:
+        component: cloud-controller-manager
+        app: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-vsphere-cloud-controller-manager
+    spec:
+      containers:
+        - name: vsphere-cloud-controller-manager
+          image: registry.k8s.io/cloud-pv-vsphere/cloud-provider-vsphere:{{ .Values.vSphereCloudControllerManager.version }}
+          args:
+            - --v=2
+            - --cloud-config=/etc/cloud/vsphere.conf
+            - --cloud-provider=vsphere
+            - --authentication-kubeconfig=/etc/kubernetes/admin.svc
+            - --kubeconfig=/etc/kubernetes/admin.svc
+            - --leader-elect=true
+          volumeMounts:
+            - mountPath: /etc/cloud
+              name: vsphere-config-volume
+              readOnly: true
+            - mountPath: /etc/kubernetes/admin.svc
+              name: '{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig'
+              subPath: admin.svc
+              readOnly: true
+          resources: {}
+      hostNetwork: false
+      securityContext:
+        runAsUser: 1001
+      serviceAccountName: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-cloud-controller-manager
+      volumes:
+        - name: vsphere-config-volume
+          secret:
+            secretName: {{ include "cluster-api-kamaji-vsphere.vsphere-config-secret-name" . }}
+        - name: '{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig'
+          secret:
+            secretName: '{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig'
+---
+{{ if .Values.vSphereCloudControllerManager.secret.create }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "cluster-api-kamaji-vsphere.vsphere-config-secret-name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+stringData:
+  vsphere.conf: |
+    global:
+      port: {{ .Values.vSphere.port }}
+      insecure-flag: {{ .Values.vSphere.insecure }}
+      password: "{{ .Values.vSphere.password }}"
+      user: "{{ .Values.vSphere.username }}"
+      thumbprint: "{{ .Values.vSphere.tlsThumbprint }}"
+    vcenter:
+      {{ .Values.vSphere.server }}:
+        datacenters:
+        - "{{ .Values.vSphere.dataCenter }}"
+        server: "{{ .Values.vSphere.server }}"
+{{- end }}
+{{- end }}
