@@ -62,6 +62,7 @@ A Helm chart for deploying a [Kamaji Tenant Cluster](https://github.com/clastix/
 | nodePools[0].numCPUs | int | `2` | Number of vCPUs to allocate to worker instances |
 | nodePools[0].replicas | int | `3` | Number of worker VMs instances |
 | nodePools[0].resourcePool | string | `"*/Resources"` | VSphere resource pool to use |
+| nodePools[0].staticRoutes | list | `[]` | Static routes for VMs if required |
 | nodePools[0].storagePolicyName | string | `""` | VSphere storage policy to use |
 | nodePools[0].template | string | `"ubuntu-2204-kube-v1.31.0"` | VSphere template to clone |
 | nodePools[0].users | list | `[{"name":"ubuntu","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]` | Search domains suffixes if required searchDomains: [] # -- VM network domain if required domain: "" # -- IPv4 gateway if required gateway: "" # -- users to create on machines |

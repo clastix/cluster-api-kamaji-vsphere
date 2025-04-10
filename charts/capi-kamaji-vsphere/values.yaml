@@ -131,6 +131,11 @@ nodePools:
     numCPUs: 2
     # -- Use dhcp for ipv4 configuration
     dhcp4: false
+    # -- Static network routes if required
+    staticRoutes: []
+      # - to: 0.0.0.0
+      #   via: 192.168.1.254
+      #   metric: 100
     # -- Use an IPAMProvider pool to reserve IPs
     addressesFromPools:
       # -- Enable the IPAMProvider usage
