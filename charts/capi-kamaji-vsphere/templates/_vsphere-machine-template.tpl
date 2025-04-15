@@ -21,6 +21,14 @@ network:
       name: {{ include "cluster-api-kamaji-vsphere.cluster-name" .Global | quote}}
     {{- end }}
     networkName: {{ .nodePool.network | quote }}
+    {{- if .nodePool.staticRoutes }}
+    routes:
+    {{- range .nodePool.staticRoutes }}
+    - to: {{ .to | quote }}
+      via: {{ .via | quote }}
+      metric: {{ .metric | default 100 }}
+    {{- end }}
+    {{- end }}
 powerOffMode: trySoft
 resourcePool: {{ .nodePool.resourcePool | quote }}
 server: {{ .Global.Values.vSphere.server | quote }}
