@@ -1,8 +1,8 @@
 name: capi-kamaji-vsphere
-version: 0.1.0
+version: 0.1.1
 appVersion: 1.31.0
-description: A Helm chart for deploying a [Kamaji Tenant Cluster](https://github.com/clastix/kamaji) on vSphere using [Kamaji](https://github.com/clastix/cluster-api-control-plane-provider-kamaji)
-  and [vSphere](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere) providers.
+description: A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API
+  and Kamaji.
 icon: https://cluster-api.sigs.k8s.io/images/introduction.svg
 type: application
 apiVersion: v2
