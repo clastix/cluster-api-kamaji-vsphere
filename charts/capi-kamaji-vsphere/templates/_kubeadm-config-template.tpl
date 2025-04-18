@@ -5,6 +5,12 @@ joinConfiguration:
     kubeletExtraArgs:
       node-ip: "{{`{{ ds.meta_data.local_ipv4 }}`}}"
       cloud-provider: external
+      {{- if and .nodePool (hasKey .nodePool "labels") }}
+      node-labels: {{ .nodePool.labels | quote }}
+      {{- end }}
+      {{- if and .nodePool (hasKey .nodePool "taints") }}
+      register-with-taints: {{ .nodePool.taints | quote }}
+      {{- end }}
     name: "{{`{{ local_hostname }}`}}"
 preKubeadmCommands:
 - hostnamectl set-hostname "{{`{{ ds.meta_data.hostname }}`}}"

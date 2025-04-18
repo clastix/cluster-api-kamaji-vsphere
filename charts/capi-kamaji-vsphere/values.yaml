@@ -151,11 +151,15 @@ nodePools:
     # domain: ""
     # # -- IPv4 gateway if required
     # gateway: ""
-    # # -- users to create on machines
+    # -- users to create on machines
     users:
     - name: ubuntu
       sshAuthorizedKeys: []
       sudo: ALL=(ALL) NOPASSWD:ALL
+    # -- Labels to add to the node pool when joining the cluster
+    # labels: "node.kubernetes.io/node=foo"
+    # -- Taints to add to the node pool when joining the cluster
+    # taints: "node.kubernetes.io/node:NoSchedule"
 
 vSphereCloudControllerManager:
   # -- Installs vsphere-cloud-controller-manager on the management cluster
