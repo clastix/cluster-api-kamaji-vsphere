@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.31.0](https://img.shields.io/badge/AppVersion-1.31.0-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.31.0](https://img.shields.io/badge/AppVersion-1.31.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -65,7 +65,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].staticRoutes | list | `[]` | Static network routes if required |
 | nodePools[0].storagePolicyName | string | `""` | VSphere storage policy to use |
 | nodePools[0].template | string | `"ubuntu-2204-kube-v1.31.0"` | VSphere template to clone |
-| nodePools[0].users | list | `[{"name":"ubuntu","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]` | Search domains suffixes if required searchDomains: [] # -- VM network domain if required domain: "" # -- IPv4 gateway if required gateway: "" # -- users to create on machines |
+| nodePools[0].users | list | `[{"name":"ubuntu","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]` | users to create on machines |
 | vSphere.dataCenter | string | `"datacenter"` | Datacenter to use |
 | vSphere.insecure | bool | `false` | If vCenter uses a self-signed cert |
 | vSphere.password | string | `"changeme"` | vSphere password |
