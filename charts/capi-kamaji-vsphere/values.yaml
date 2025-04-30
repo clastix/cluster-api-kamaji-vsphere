@@ -9,16 +9,12 @@ vSphere:
   insecure: false
   # -- VSphere https TLS thumbprint
   tlsThumbprint: ""
-  # -- Create a secret with the VSphere credentials
-  secret:
-    # -- Specifies whether Secret should be created from config values
-    create: false
-    # -- The name of an existing Secret for vSphere. 
+  # -- VSphere Identity Management
+  identityRef:
+    # -- Specifies whether use VSphereClusterIdentity or Secret
+    type: Secret
+    # -- Specifies the name of the VSphereClusterIdentity or Secret
     name: vsphere-secret
-  # -- vSphere username
-  username: "admin@vcenter"
-  # -- vSphere password
-  password: "changeme"
 
 ipamProvider:
   # -- Enable the IPAMProvider usage
@@ -165,14 +161,8 @@ vSphereCloudControllerManager:
   # -- Installs vsphere-cloud-controller-manager on the management cluster
   enabled: true
   secret:
-    # -- Specifies whether Secret should be created from config values
-    create: false
     # -- The name of an existing Secret for vSphere. 
     name: vsphere-config-secret
-  # -- vSphere username
-  username: "admin@vcenter"
-  # -- vSphere password
-  password: "changeme"
   # -- Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release.
   version: v1.31.0
 
@@ -182,14 +172,8 @@ vSphereStorageControllerManager:
   # -- log level for the CSI components
   logLevel: "PRODUCTION" # PRODUCTION, DEVELOPMENT
   secret:
-    # -- Specifies whether Secret should be created from config values
-    create: false
     # -- The name of an existing Secret for vSphere. 
     name: csi-config-secret
-  # -- vSphere CSI username
-  username: "admin@vcenter"
-  # -- vSphere CSI password
-  password: "changeme"
   # -- Target namespace for the vSphere CSI node drivers on the workload cluster
   namespace: "kube-system"
   storageClass:

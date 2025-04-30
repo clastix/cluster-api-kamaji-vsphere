@@ -79,27 +79,4 @@ spec:
         - name: '{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig'
           secret:
             secretName: '{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig'
----
-{{ if .Values.vSphereCloudControllerManager.secret.create }}
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ include "cluster-api-kamaji-vsphere.vsphere-config-secret-name" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
-stringData:
-  vsphere.conf: |
-    global:
-      port: {{ .Values.vSphere.port }}
-      insecure-flag: {{ .Values.vSphere.insecure }}
-      password: "{{ .Values.vSphere.password }}"
-      user: "{{ .Values.vSphere.username }}"
-      thumbprint: "{{ .Values.vSphere.tlsThumbprint }}"
-    vcenter:
-      {{ .Values.vSphere.server }}:
-        datacenters:
-        - "{{ .Values.vSphere.dataCenter }}"
-        server: "{{ .Values.vSphere.server }}"
-{{- end }}
 {{- end }}

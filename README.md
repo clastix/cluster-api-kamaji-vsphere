@@ -11,10 +11,9 @@ This Helm chart deploys a Kubernetes cluster on vSphere using Cluster API with K
   - [Cluster Autoscaler Integration](#cluster-autoscaler-integration)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Secret Management](#secret-management)
-  - [Create Cluster API Secret](#create-cluster-api-secret)
-  - [Create Cloud Controller Manager Secret](#create-cloud-controller-manager-secret)
-  - [Create CSI Controller Secret](#create-csi-controller-secret)
+- [Credentials Management](#credentials-management)
+  - [Credentials through Secrets](#credentials-through-secrets)
+  - [Credentials through VSphereClusterIdentity](#credentials-through-vsphereclusteridentity)
 - [Usage](#usage)
   - [Creating a cluster](#creating-a-cluster)
   - [Upgrading a cluster](#upgrading-a-cluster)
@@ -125,51 +124,27 @@ helm repo update
 helm install my-cluster clastix/capi-kamaji-vsphere -f my-values.yaml
 ```
 
-## Secret Management
+## Credentials Management
 
-The chart requires three distinct vSphere access secrets:
+Cluster API Provider vSphere (CAPV) supports multiple methods to provide vCenter credentials and authorize  clusters to use them:
 
-1. **Cluster API Secret** (default name `vsphere-secret`)
-   - Used by Cluster API to provision VMs
-   - Contains vSphere credentials for infrastructure operations
+- **Secrets**: credentials are provided via `secret` used by `VSphereCluster`. This will create a unique relationship between the `VSphereCluster` and `secret` and the `secret` cannot be utilized by other clusters.
 
-2. **Cloud Controller Manager Secret** (default name `vsphere-config-secret`)
-   - Used by the vSphere Cloud Provider Interface
-   - Contains configuration for vCenter
+- **VSphereClusterIdentity**: credentials are provided via `VSphereClusterIdentity`, a cluster scoped resource and enables multiple `VSphereClusters` to share the same set of credentials. The namespaces that are allowed to use the `VSphereClusterIdentity` can also be configured via a `LabelSelector`.
 
-3. **CSI Controller Secret** (default name `csi-config-secret`)
-   - Used by the Storage Controller Manager
-   - Enables volume provisioning and attachment
+More details on the CAPV documentation: [Cluster API Provider vSphere](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere)
 
-You can leave the chart to create these secrets or reference existing ones:
+### Credentials through Secrets
+The chart creates three secrets by default, one for each component that requires vSphere credentials. These secrets are created in the same namespace as the `Cluster` resource and are labeled with the cluster name:
 
 ```yaml
-# Using existing secrets
-vsphere:
-  secret:
-    create: false
-    name: vsphere-secret
-
-vSphereCloudControllerManager:
-  secret:
-    create: false
-    name: vsphere-config-secret
-
-vSphereStorageControllerManager:
-  secret:
-    create: false
-    name: csi-config-secret
-```
-
-### Create Cluster API Secret
-
-```bash
 # Create the vsphere-secret for Cluster API
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
   name: vsphere-secret
+  namespace: my-cluster
   labels:
     cluster.x-k8s.io/cluster-name: "my-cluster"
 stringData:
@@ -178,15 +153,14 @@ stringData:
 EOF
 ```
 
-### Create Cloud Controller Manager Secret
-
-```bash
+```yaml
 # Create the vsphere-config-secret for Cloud Controller Manager
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
   name: vsphere-config-secret
+  namespace: my-cluster
   labels:
     cluster.x-k8s.io/cluster-name: "my-cluster"
 stringData:
@@ -205,15 +179,102 @@ stringData:
 EOF
 ```
 
-### Create CSI Controller Secret
-
-```bash
+```yaml
 # Create the csi-config-secret for Storage Controller
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
   name: csi-config-secret
+  namespace: my-cluster
+  labels:
+    cluster.x-k8s.io/cluster-name: "my-cluster"
+stringData:
+  csi-vsphere.conf: |
+    [Global]
+    cluster-id = "namespace/my-cluster"
+    thumbprint = "YOUR_VCENTER_THUMBPRINT"
+    insecure-flag = false
+    [VirtualCenter "vcenter.example.com"]
+    user        = "administrator@vsphere.local"
+    password    = "YOUR_PASSWORD"
+    datacenters = "YOUR_DATACENTER"
+EOF
+```
+
+### Credentials through VSphereClusterIdentity
+The chart can also be configured to use `VSphereClusterIdentity` for managing vSphere credentials. This allows multiple clusters to share the same credentials.
+
+Deploy a secret with the credentials in the CAPV manager namespace (capv-system by default):
+
+```yaml
+# Create the vsphere-secret for Cluster API
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vsphere-secret
+  namespace: capv-system
+  labels:
+    cluster.x-k8s.io/cluster-name: "my-cluster"
+stringData:
+  username: "administrator@vsphere.local"
+  password: "YOUR_PASSWORD"
+EOF
+```
+
+Deploy a `VSphereClusterIdentity` that references the secret above. The `allowedNamespaces` selector can also be used to control which namespaces are allowed to use the identity:
+
+```yaml
+# Create the VSphereClusterIdentity
+cat <<EOF | kubectl apply -f -
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
+kind: VSphereClusterIdentity
+metadata:
+  name: vsphere-cluster-identity
+spec:
+  secretName: vsphere-secret
+  allowedNamespaces:
+    selector:
+      matchLabels: {} # allow all namespaces
+```
+
+> **Note**: The CSI secret and the Cloud Controller Manager secret must still be created separately.
+
+```yaml
+# Create the vsphere-config-secret for Cloud Controller Manager
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vsphere-config-secret
+  namespace: my-cluster
+  labels:
+    cluster.x-k8s.io/cluster-name: "my-cluster"
+stringData:
+  vsphere.conf: |
+    global:
+      port: 443
+      insecure-flag: false
+      password: "YOUR_PASSWORD"
+      user: "administrator@vsphere.local"
+      thumbprint: "YOUR_VCENTER_THUMBPRINT"
+    vcenter:
+      vcenter.example.com:
+        datacenters:
+        - "YOUR_DATACENTER"
+        server: "vcenter.example.com"
+EOF
+```
+
+```yaml
+# Create the csi-config-secret for Storage Controller
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: csi-config-secret
+  namespace: my-cluster
   labels:
     cluster.x-k8s.io/cluster-name: "my-cluster"
 stringData:
@@ -314,88 +375,7 @@ kubectl logs -l component=csi-controller-manager
 
 ## Configuration
 
-Here the values you can override:
-
-## Values
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| cluster.controlPlane.addons.coreDNS | object | `{}` | KamajiControlPlane coreDNS configuration |
-| cluster.controlPlane.addons.konnectivity | object | `{}` | KamajiControlPlane konnectivity configuration |
-| cluster.controlPlane.addons.kubeProxy | object | `{}` | KamajiControlPlane kube-proxy configuration |
-| cluster.controlPlane.apiServer | object | `{"extraArgs":["--cloud-provider=external"]}` | extraArgs for the control plane components |
-| cluster.controlPlane.controllerManager.extraArgs[0] | string | `"--cloud-provider=external"` |  |
-| cluster.controlPlane.dataStoreName | string | `"default"` | KamajiControlPlane dataStoreName |
-| cluster.controlPlane.kubelet.cgroupfs | string | `"systemd"` | kubelet cgroupfs configuration |
-| cluster.controlPlane.kubelet.preferredAddressTypes | list | `["InternalIP","ExternalIP","Hostname"]` | kubelet preferredAddressTypes order |
-| cluster.controlPlane.labels | object | `{"cni":"calico"}` | Labels to add to the control plane |
-| cluster.controlPlane.network.certSANs | list | `[]` | List of additional Subject Alternative Names to use for the API Server serving certificate |
-| cluster.controlPlane.network.serviceAddress | string | `""` | Address used to expose the Kubernetes API server. If not set, the service will be exposed on the first available address. |
-| cluster.controlPlane.network.serviceAnnotations | object | `{}` | Annotations to use for the control plane service |
-| cluster.controlPlane.network.serviceLabels | object | `{}` | Labels to use for the control plane service |
-| cluster.controlPlane.network.serviceType | string | `"LoadBalancer"` | Type of service used to expose the Kubernetes API server |
-| cluster.controlPlane.replicas | int | `2` | Number of control plane replicas |
-| cluster.controlPlane.version | string | `"v1.31.0"` | Kubernetes version |
-| cluster.metrics.enabled | bool | `false` | Enable metrics collection. ServiceMonitor custom resource definition must be installed on the Management cluster. |
-| cluster.metrics.serviceAccount | object | `{"name":"kube-prometheus-stack-prometheus","namespace":"monitoring-system"}` | ServiceAccount for scraping metrics |
-| cluster.metrics.serviceAccount.name | string | `"kube-prometheus-stack-prometheus"` | ServiceAccount name used for scraping metrics |
-| cluster.metrics.serviceAccount.namespace | string | `"monitoring-system"` | ServiceAccount namespace |
-| cluster.name | string | `""` | Cluster name. If unset, the release name will be used |
-| ipamProvider.enabled | bool | `true` | Enable the IPAMProvider usage |
-| ipamProvider.gateway | string | `"192.168.0.1"` | IPAMProvider gateway |
-| ipamProvider.prefix | string | `"24"` | IPAMProvider prefix |
-| ipamProvider.ranges | list | `["192.168.0.0/24"]` | IPAMProvider ranges |
-| nodePools[0].addressesFromPools | object | `{"enabled":true}` | Use an IPAMProvider pool to reserve IPs |
-| nodePools[0].addressesFromPools.enabled | bool | `true` | Enable the IPAMProvider usage |
-| nodePools[0].autoscaling.enabled | bool | `false` | Enable autoscaling |
-| nodePools[0].autoscaling.labels.autoscaling | string | `"enabled"` | Labels to use for autoscaling: make sure to use the same labels on the autoscaler configuration |
-| nodePools[0].autoscaling.maxSize | string | `"6"` | Maximum number of instances in the pool |
-| nodePools[0].autoscaling.minSize | string | `"2"` | Minimum number of instances in the pool |
-| nodePools[0].dataStore | string | `"datastore"` | VSphere datastore to use |
-| nodePools[0].dhcp4 | bool | `false` | Use dhcp for ipv4 configuration |
-| nodePools[0].diskGiB | int | `40` | Disk size of VM in GiB |
-| nodePools[0].folder | string | `"default-pool"` | VSphere folder to store VMs |
-| nodePools[0].memoryMiB | int | `4096` | Memory to allocate to worker VMs |
-| nodePools[0].name | string | `"default"` |  |
-| nodePools[0].nameServers | list | `["8.8.8.8"]` | Nameservers for VMs DNS resolution if required |
-| nodePools[0].network | string | `"network"` | VSphere network for VMs and CSI |
-| nodePools[0].numCPUs | int | `2` | Number of vCPUs to allocate to worker instances |
-| nodePools[0].replicas | int | `3` | Number of worker VMs instances |
-| nodePools[0].resourcePool | string | `"*/Resources"` | VSphere resource pool to use |
-| nodePools[0].staticRoutes | list | `[]` | Static network routes for VMs if required |
-| nodePools[0].storagePolicyName | string | `""` | VSphere storage policy to use |
-| nodePools[0].template | string | `"ubuntu-2204-kube-v1.31.0"` | VSphere template to clone |
-| nodePools[0].users | list | `[{"name":"ubuntu","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]` | Search domains suffixes if required searchDomains: [] # -- VM network domain if required domain: "" # -- IPv4 gateway if required gateway: "" # -- users to create on machines |
-| vSphere.dataCenter | string | `"datacenter"` | Datacenter to use |
-| vSphere.insecure | bool | `false` | If vCenter uses a self-signed cert |
-| vSphere.password | string | `"changeme"` | vSphere password |
-| vSphere.port | int | `443` | VSphere server port |
-| vSphere.secret | object | `{"create":false,"name":"vsphere-secret"}` | Create a secret with the VSphere credentials |
-| vSphere.secret.create | bool | `false` | Specifies whether Secret should be created from config values |
-| vSphere.secret.name | string | `"vsphere-secret"` | The name of an existing Secret for vSphere.  |
-| vSphere.server | string | `"server.sample.org"` | VSphere server dns name or address |
-| vSphere.tlsThumbprint | string | `""` | VSphere https TLS thumbprint |
-| vSphere.username | string | `"admin@vcenter"` | vSphere username |
-| vSphereCloudControllerManager.enabled | bool | `true` | Installs vsphere-cloud-controller-manager on the management cluster |
-| vSphereCloudControllerManager.password | string | `"changeme"` | vSphere password |
-| vSphereCloudControllerManager.secret.create | bool | `false` | Specifies whether Secret should be created from config values |
-| vSphereCloudControllerManager.secret.name | string | `"vsphere-config-secret"` | The name of an existing Secret for vSphere.  |
-| vSphereCloudControllerManager.username | string | `"admin@vcenter"` | vSphere username |
-| vSphereCloudControllerManager.version | string | `"v1.31.0"` | Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release. |
-| vSphereStorageControllerManager.enabled | bool | `false` | Installs vsphere-storage-controller-manager on the management cluster. NB: CSI node drivers are always installed on the workload cluster. |
-| vSphereStorageControllerManager.logLevel | string | `"PRODUCTION"` | log level for the CSI components |
-| vSphereStorageControllerManager.namespace | string | `"kube-system"` | Target namespace for the vSphere CSI node drivers on the workload cluster |
-| vSphereStorageControllerManager.password | string | `"changeme"` | vSphere CSI password |
-| vSphereStorageControllerManager.secret.create | bool | `false` | Specifies whether Secret should be created from config values |
-| vSphereStorageControllerManager.secret.name | string | `"csi-config-secret"` | The name of an existing Secret for vSphere.  |
-| vSphereStorageControllerManager.storageClass.allowVolumeExpansion | bool | `true` | Allow volume expansion |
-| vSphereStorageControllerManager.storageClass.default | bool | `true` | Configure as the default storage class |
-| vSphereStorageControllerManager.storageClass.enabled | bool | `false` | StorageClass enablement |
-| vSphereStorageControllerManager.storageClass.name | string | `"vsphere-csi"` | Name of the storage class |
-| vSphereStorageControllerManager.storageClass.parameters | object | `{}` | Optional storage class parameters |
-| vSphereStorageControllerManager.storageClass.reclaimPolicy | string | `"Delete"` | Reclaim policy |
-| vSphereStorageControllerManager.storageClass.volumeBindingMode | string | `"WaitForFirstConsumer"` | Volume binding mode |
-| vSphereStorageControllerManager.username | string | `"admin@vcenter"` | vSphere CSI username |
+See the values you can override [here](charts/capi-kamaji-vsphere/README.md).
 
 ## Maintainers
 
