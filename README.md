@@ -228,7 +228,7 @@ Deploy a `VSphereClusterIdentity` that references the secret above. The `allowed
 ```yaml
 # Create the VSphereClusterIdentity
 cat <<EOF | kubectl apply -f -
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: VSphereClusterIdentity
 metadata:
   name: vsphere-cluster-identity
