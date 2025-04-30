@@ -264,26 +264,4 @@ spec:
       - name: kubeconfig
         secret:
           secretName: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig
----
-{{- if .Values.vSphereStorageControllerManager.secret.create -}}
-apiVersion: v1
-kind: Secret
-metadata:
-  labels:
-    component: csi-controller-manager
-    cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
-  name: {{ include "cluster-api-kamaji-vsphere.csi-config-secret-name" . }}
-  namespace: {{ .Release.Namespace }}
-stringData:
-  csi-vsphere.conf: |
-    [Global]
-    cluster-id = "{{ .Release.Namespace }}/{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}"
-    thumbprint = "{{ .Values.vSphere.tlsThumbprint }}"
-    insecure-flag  = {{ default "false" .Values.vSphere.insecure }}
-
-    [VirtualCenter "{{ .Values.vSphere.server }}"]
-    port     = {{ default "443" .Values.vSphere.port }}
-    user     = "{{ default .Values.vSphere.username .Values.vSphereStorageControllerManager.username }}"
-    password = "{{ default .Values.vSphere.password .Values.vSphereStorageControllerManager.password }}"
-{{- end }}
 {{- end }}
