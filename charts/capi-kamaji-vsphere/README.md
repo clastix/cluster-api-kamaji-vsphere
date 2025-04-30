@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.31.0](https://img.shields.io/badge/AppVersion-1.31.0-informational?style=flat-square)
+![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -35,7 +35,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | cluster.controlPlane.network.serviceLabels | object | `{}` | Labels to use for the control plane service |
 | cluster.controlPlane.network.serviceType | string | `"LoadBalancer"` | Type of service used to expose the Kubernetes API server |
 | cluster.controlPlane.replicas | int | `2` | Number of control plane replicas |
-| cluster.controlPlane.version | string | `"v1.31.0"` | Kubernetes version |
+| cluster.controlPlane.version | string | `"v1.32.0"` | Kubernetes version |
 | cluster.metrics.enabled | bool | `false` | Enable metrics collection. ServiceMonitor custom resource definition must be installed on the Management cluster. |
 | cluster.metrics.serviceAccount | object | `{"name":"kube-prometheus-stack-prometheus","namespace":"monitoring-system"}` | ServiceAccount for scraping metrics |
 | cluster.metrics.serviceAccount.name | string | `"kube-prometheus-stack-prometheus"` | ServiceAccount name used for scraping metrics |
@@ -64,7 +64,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].resourcePool | string | `"*/Resources"` | VSphere resource pool to use |
 | nodePools[0].staticRoutes | list | `[]` | Static network routes if required |
 | nodePools[0].storagePolicyName | string | `""` | VSphere storage policy to use |
-| nodePools[0].template | string | `"ubuntu-2204-kube-v1.31.0"` | VSphere template to clone |
+| nodePools[0].template | string | `"ubuntu-2204-kube-v1.32.0"` | VSphere template to clone |
 | nodePools[0].users | list | `[{"name":"ubuntu","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]` | users to create on machines |
 | vSphere.dataCenter | string | `"datacenter"` | Datacenter to use |
 | vSphere.identityRef | object | `{"name":"vsphere-secret","type":"Secret"}` | VSphere Identity Management |
@@ -76,7 +76,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | vSphere.tlsThumbprint | string | `""` | VSphere https TLS thumbprint |
 | vSphereCloudControllerManager.enabled | bool | `true` | Installs vsphere-cloud-controller-manager on the management cluster |
 | vSphereCloudControllerManager.secret.name | string | `"vsphere-config-secret"` | The name of an existing Secret for vSphere.  |
-| vSphereCloudControllerManager.version | string | `"v1.31.0"` | Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release. |
+| vSphereCloudControllerManager.version | string | `"v1.32.0"` | Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release. |
 | vSphereStorageControllerManager.enabled | bool | `false` | Installs vsphere-storage-controller-manager on the management cluster. NB: CSI node drivers are always installed on the workload cluster. |
 | vSphereStorageControllerManager.logLevel | string | `"PRODUCTION"` | log level for the CSI components |
 | vSphereStorageControllerManager.namespace | string | `"kube-system"` | Target namespace for the vSphere CSI node drivers on the workload cluster |

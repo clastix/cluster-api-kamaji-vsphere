@@ -78,7 +78,7 @@ cluster:
       # -- List of additional Subject Alternative Names to use for the API Server serving certificate
       certSANs: []
     # -- Kubernetes version
-    version: v1.31.0
+    version: v1.32.0
   metrics:
     # -- Enable metrics collection. ServiceMonitor custom resource definition must be installed on the Management cluster.
     enabled: false
@@ -104,7 +104,7 @@ nodePools:
     # -- VSphere storage policy to use
     storagePolicyName: ""
     # -- VSphere template to clone
-    template: "ubuntu-2204-kube-v1.31.0"
+    template: "ubuntu-2204-kube-v1.32.0"
     # -- VSphere network for VMs and CSI
     network: "network"
     # -- Number of worker VMs instances
@@ -164,7 +164,7 @@ vSphereCloudControllerManager:
     # -- The name of an existing Secret for vSphere. 
     name: vsphere-config-secret
   # -- Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release.
-  version: v1.31.0
+  version: v1.32.0
 
 vSphereStorageControllerManager:
   # -- Installs vsphere-storage-controller-manager on the management cluster. NB: CSI node drivers are always installed on the workload cluster.
