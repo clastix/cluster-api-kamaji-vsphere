@@ -38,11 +38,12 @@ cluster:
     replicas: 2
     # -- extraArgs for the control plane components
     apiServer:
-      extraArgs:
-        - --cloud-provider=external
+      extraArgs: []
     controllerManager:
       extraArgs:
         - --cloud-provider=external
+    scheduler:
+      extraArgs: []
     # -- KamajiControlPlane dataStoreName
     dataStoreName: default
     addons:

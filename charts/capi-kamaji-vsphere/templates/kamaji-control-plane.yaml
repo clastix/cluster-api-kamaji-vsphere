@@ -11,10 +11,19 @@ metadata:
 spec:
   apiServer:
     extraArgs:
-      - --cloud-provider=external
+      {{- range .Values.cluster.controlPlane.apiServer.extraArgs }}
+      - {{ . }}
+      {{- end }} 
   controllerManager:
     extraArgs:
-      - --cloud-provider=external
+      {{- range .Values.cluster.controlPlane.controllerManager.extraArgs }}
+      - {{ . }}
+      {{- end }}
+  scheduler:
+    extraArgs:
+      {{- range .Values.cluster.controlPlane.scheduler.extraArgs }}
+      - {{ . }}
+      {{- end }}
   dataStoreName: {{ .Values.cluster.controlPlane.dataStoreName | quote }}
   addons:
     coreDNS: {}

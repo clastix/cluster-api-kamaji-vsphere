@@ -23,7 +23,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | cluster.controlPlane.addons.coreDNS | object | `{}` | KamajiControlPlane coreDNS configuration |
 | cluster.controlPlane.addons.konnectivity | object | `{}` | KamajiControlPlane konnectivity configuration |
 | cluster.controlPlane.addons.kubeProxy | object | `{}` | KamajiControlPlane kube-proxy configuration |
-| cluster.controlPlane.apiServer | object | `{"extraArgs":["--cloud-provider=external"]}` | extraArgs for the control plane components |
+| cluster.controlPlane.apiServer | object | `{"extraArgs":[]}` | extraArgs for the control plane components |
 | cluster.controlPlane.controllerManager.extraArgs[0] | string | `"--cloud-provider=external"` |  |
 | cluster.controlPlane.dataStoreName | string | `"default"` | KamajiControlPlane dataStoreName |
 | cluster.controlPlane.kubelet.cgroupfs | string | `"systemd"` | kubelet cgroupfs configuration |
@@ -35,6 +35,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | cluster.controlPlane.network.serviceLabels | object | `{}` | Labels to use for the control plane service |
 | cluster.controlPlane.network.serviceType | string | `"LoadBalancer"` | Type of service used to expose the Kubernetes API server |
 | cluster.controlPlane.replicas | int | `2` | Number of control plane replicas |
+| cluster.controlPlane.scheduler.extraArgs | list | `[]` |  |
 | cluster.controlPlane.version | string | `"v1.32.0"` | Kubernetes version |
 | cluster.metrics.enabled | bool | `false` | Enable metrics collection. ServiceMonitor custom resource definition must be installed on the Management cluster. |
 | cluster.metrics.serviceAccount | object | `{"name":"kube-prometheus-stack-prometheus","namespace":"monitoring-system"}` | ServiceAccount for scraping metrics |
