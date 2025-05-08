@@ -166,30 +166,3 @@ vSphereCloudControllerManager:
     name: vsphere-config-secret
   # -- Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release.
   version: v1.32.0
-
-vSphereStorageControllerManager:
-  # -- Installs vsphere-storage-controller-manager on the management cluster. NB: CSI node drivers are always installed on the workload cluster.
-  enabled: false
-  # -- log level for the CSI components
-  logLevel: "PRODUCTION" # PRODUCTION, DEVELOPMENT
-  secret:
-    # -- The name of an existing Secret for vSphere. 
-    name: csi-config-secret
-  # -- Target namespace for the vSphere CSI node drivers on the workload cluster
-  namespace: "kube-system"
-  storageClass:
-    # -- StorageClass enablement
-    enabled: false
-    # -- Name of the storage class
-    name: "vsphere-csi"
-    # -- Allow volume expansion
-    allowVolumeExpansion: true
-    # -- Reclaim policy
-    reclaimPolicy: Delete
-    # -- Volume binding mode
-    volumeBindingMode: WaitForFirstConsumer
-    # -- Optional storage class parameters
-    parameters: {}
-    #  storagepolicyname: DATASTORE_POLICY_NAME
-    # -- Configure as the default storage class
-    default: true

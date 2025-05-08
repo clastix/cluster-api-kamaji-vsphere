@@ -4,7 +4,6 @@ This Helm chart deploys a Kubernetes cluster on vSphere using Cluster API with K
 
 ## Table of Contents
 
-- [Architecture Overview](#architecture-overview)
 - [Key Features](#key-features)
   - [Automatic Rolling Updates](#automatic-rolling-updates)
   - [Split Infrastructure Controller Deployment](#split-infrastructure-controller-deployment)
@@ -23,16 +22,6 @@ This Helm chart deploys a Kubernetes cluster on vSphere using Cluster API with K
 - [Configuration](#configuration)
 - [License](#license)
 
-## Architecture Overview
-
-The chart implements a **Split Architecture** where:
-
-1. The Kubernetes control plane runs as containers on the management cluster (Kamaji)
-2. The Cloud Controller Manager (CPI) and CSI Storage Controller run on the management cluster
-3. Worker nodes run CSI Node drivers on the workload cluster
-4. Communication between components happens via the Kubernetes API server
-
-This approach provides security benefits by isolating vSphere credentials from tenant users while maintaining full Cluster API integration.
 
 ## Key Features
 
@@ -58,11 +47,7 @@ The implementation uses hash-suffixed templates, `VSphereMachineTemplate` and `K
 
 ### Split Infrastructure Controller Deployment
 
-The chart deploys vSphere infrastructure controllers on the management cluster instead of the workload cluster:
-
-- **Cloud Controller Manager (CPI)**: Runs on the management cluster with access to the hosted tenant's API server
-- **vSphere CSI Controller**: Runs on the management cluster
-- **CSI Node Drivers**: Deployed on workload cluster nodes via `ClusterResourceSet`
+The chart deploys vSphere controllers on the management cluster instead of the workload cluster.
 
 This architecture enables:
 - Tenant isolation from vSphere credentials
@@ -179,29 +164,6 @@ stringData:
 EOF
 ```
 
-```yaml
-# Create the csi-config-secret for Storage Controller
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Secret
-metadata:
-  name: csi-config-secret
-  namespace: my-cluster
-  labels:
-    cluster.x-k8s.io/cluster-name: "my-cluster"
-stringData:
-  csi-vsphere.conf: |
-    [Global]
-    cluster-id = "namespace/my-cluster"
-    thumbprint = "YOUR_VCENTER_THUMBPRINT"
-    insecure-flag = false
-    [VirtualCenter "vcenter.example.com"]
-    user        = "administrator@vsphere.local"
-    password    = "YOUR_PASSWORD"
-    datacenters = "YOUR_DATACENTER"
-EOF
-```
-
 ### Credentials through VSphereClusterIdentity
 The chart can also be configured to use `VSphereClusterIdentity` for managing vSphere credentials. This allows multiple clusters to share the same credentials.
 
@@ -239,7 +201,6 @@ spec:
       matchLabels: {} # allow all namespaces
 ```
 
-> **Note**: The CSI secret and the Cloud Controller Manager secret must still be created separately.
 
 ```yaml
 # Create the vsphere-config-secret for Cloud Controller Manager
@@ -264,29 +225,6 @@ stringData:
         datacenters:
         - "YOUR_DATACENTER"
         server: "vcenter.example.com"
-EOF
-```
-
-```yaml
-# Create the csi-config-secret for Storage Controller
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Secret
-metadata:
-  name: csi-config-secret
-  namespace: my-cluster
-  labels:
-    cluster.x-k8s.io/cluster-name: "my-cluster"
-stringData:
-  csi-vsphere.conf: |
-    [Global]
-    cluster-id = "namespace/my-cluster"
-    thumbprint = "YOUR_VCENTER_THUMBPRINT"
-    insecure-flag = false
-    [VirtualCenter "vcenter.example.com"]
-    user        = "administrator@vsphere.local"
-    password    = "YOUR_PASSWORD"
-    datacenters = "YOUR_DATACENTER"
 EOF
 ```
 
@@ -364,13 +302,6 @@ If nodes taints are not removed:
 ```bash
 # Check CPI Controller logs
 kubectl logs -l component=cloud-controller-manager
-```
-
-If volume provisioning fails:
-
-```bash
-# Check CSI Controller logs
-kubectl logs -l component=csi-controller-manager
 ```
 
 ## Configuration
