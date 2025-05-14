@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -26,6 +26,13 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | cluster.controlPlane.apiServer | object | `{"extraArgs":[]}` | extraArgs for the control plane components |
 | cluster.controlPlane.controllerManager.extraArgs[0] | string | `"--cloud-provider=external"` |  |
 | cluster.controlPlane.dataStoreName | string | `"default"` | KamajiControlPlane dataStoreName |
+| cluster.controlPlane.deployment | object | `{"additionalMetadata":{"annotations":{},"labels":{}},"affinity":{},"nodeSelector":{"kubernetes.io/os":"linux"},"podAdditionalMetadata":{"annotations":{},"labels":{}},"tolerations":[],"topologySpreadConstraints":[]}` | Configure how KamajiControlPlane deployment should be done |
+| cluster.controlPlane.deployment.additionalMetadata | object | `{"annotations":{},"labels":{}}` | Additional metadata as labels and annotations |
+| cluster.controlPlane.deployment.affinity | object | `{}` | Affinity scheduling rules |
+| cluster.controlPlane.deployment.nodeSelector | object | `{"kubernetes.io/os":"linux"}` | NodeSelector for scheduling |
+| cluster.controlPlane.deployment.podAdditionalMetadata | object | `{"annotations":{},"labels":{}}` | Pods Additional metadata as labels and annotations |
+| cluster.controlPlane.deployment.tolerations | list | `[]` | Tolerations for scheduling |
+| cluster.controlPlane.deployment.topologySpreadConstraints | list | `[]` | TopologySpreadConstraints for scheduling |
 | cluster.controlPlane.kubelet.cgroupfs | string | `"systemd"` | kubelet cgroupfs configuration |
 | cluster.controlPlane.kubelet.preferredAddressTypes | list | `["InternalIP","ExternalIP","Hostname"]` | kubelet preferredAddressTypes order |
 | cluster.controlPlane.labels | object | `{"cni":"calico"}` | Labels to add to the control plane |

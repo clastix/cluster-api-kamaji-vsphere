@@ -53,6 +53,25 @@ cluster:
       kubeProxy: {}
       # -- KamajiControlPlane konnectivity configuration
       konnectivity: {}
+    # -- Configure how KamajiControlPlane deployment should be done
+    deployment:
+      # -- Additional metadata as labels and annotations
+      additionalMetadata: 
+        labels: {}
+        annotations: {}
+      # -- Pods Additional metadata as labels and annotations
+      podAdditionalMetadata:
+        labels: {}
+        annotations: {}
+      # -- Affinity scheduling rules
+      affinity: {}
+      # -- Tolerations for scheduling
+      tolerations: []
+      # -- NodeSelector for scheduling
+      nodeSelector:
+        kubernetes.io/os: linux
+      # -- TopologySpreadConstraints for scheduling
+      topologySpreadConstraints: []
     kubelet:
       # -- kubelet cgroupfs configuration
       cgroupfs: systemd
