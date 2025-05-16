@@ -42,7 +42,7 @@ The implementation uses hash-suffixed templates, `VSphereMachineTemplate` and `K
 #### Rolling Update Workflow
 
 1. Update `values.yaml` with new configuration
-2. Run: `helm upgrade my-cluster ./cluster-api-kamaji-vsphere`
+2. Run: `helm upgrade cluster-name ./cluster-api-kamaji-vsphere`
 3. Cluster API automatically replaces nodes using the new configuration
 
 ### Split Infrastructure Controller Deployment
@@ -106,7 +106,7 @@ helm repo add clastix https://clastix.github.io/charts
 helm repo update
 
 # Install with custom values
-helm install my-cluster clastix/capi-kamaji-vsphere -f my-values.yaml
+helm install cluster-name clastix/capi-kamaji-vsphere -f my-values.yaml
 ```
 
 ## Credentials Management
@@ -129,9 +129,9 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: vsphere-secret
-  namespace: my-cluster
+  namespace: cluster-namespace
   labels:
-    cluster.x-k8s.io/cluster-name: "my-cluster"
+    cluster.x-k8s.io/cluster-name: "cluster-name"
 stringData:
   username: "administrator@vsphere.local"
   password: "YOUR_PASSWORD"
@@ -145,9 +145,9 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: vsphere-config-secret
-  namespace: my-cluster
+  namespace: cluster-namespace
   labels:
-    cluster.x-k8s.io/cluster-name: "my-cluster"
+    cluster.x-k8s.io/cluster-name: "cluster-name"
 stringData:
   vsphere.conf: |
     global:
@@ -178,7 +178,7 @@ metadata:
   name: vsphere-secret
   namespace: capv-system
   labels:
-    cluster.x-k8s.io/cluster-name: "my-cluster"
+    cluster.x-k8s.io/cluster-name: "cluster-name"
 stringData:
   username: "administrator@vsphere.local"
   password: "YOUR_PASSWORD"
@@ -209,9 +209,9 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: vsphere-config-secret
-  namespace: my-cluster
+  namespace: cluster-namespace
   labels:
-    cluster.x-k8s.io/cluster-name: "my-cluster"
+    cluster.x-k8s.io/cluster-name: "cluster-name"
 stringData:
   vsphere.conf: |
     global:
@@ -234,13 +234,13 @@ EOF
 
 ```bash
 # Deploy using the chart
-helm install my-cluster ./cluster-api-kamaji-vsphere -f values.yaml
+helm install cluster-name ./cluster-api-kamaji-vsphere -f values.yaml
 
 # Check status
 kubectl get cluster,machines
 
 # Get kubeconfig
-clusterctl get kubeconfig my-cluster > my-cluster.kubeconfig
+clusterctl get kubeconfig cluster-name > cluster-name.kubeconfig
 ```
 
 ### Upgrading a cluster
@@ -256,7 +256,7 @@ vSphereCloudControllerManager:
   version: "v1.32.0"
 
 # Apply upgrade
-helm upgrade my-cluster ./cluster-api-kamaji-vsphere -f values.yaml
+helm upgrade cluster-name ./cluster-api-kamaji-vsphere -f values.yaml
 
 # Watch the rolling update
 kubectl get machines -w
@@ -271,7 +271,7 @@ nodePools:
     replicas: 5
 
 # Apply scaling
-helm upgrade my-cluster ./cluster-api-kamaji-vsphere -f values.yaml
+helm upgrade cluster-name ./cluster-api-kamaji-vsphere -f values.yaml
 
 # Watch the scaling
 kubectl get machines -w
@@ -281,7 +281,7 @@ kubectl get machines -w
 
 ```bash
 # Delete the cluster
-helm uninstall my-cluster
+helm uninstall cluster-name
 ```
 
 ### Troubleshooting
@@ -290,11 +290,11 @@ If Helm uninstall fails with IP pool deletion errors:
 
 ```bash
 # Wait for machines to be deleted first
-kubectl delete machinedeployment -l cluster.x-k8s.io/cluster-name=my-cluster
-kubectl wait --for=delete vspheremachines -l cluster.x-k8s.io/cluster-name=my-cluster
+kubectl delete machinedeployment -l cluster.x-k8s.io/cluster-name=cluster-name
+kubectl wait --for=delete vspheremachines -l cluster.x-k8s.io/cluster-name=cluster-name
 
 # Retry helm uninstall
-helm uninstall my-cluster
+helm uninstall cluster-name
 ```
 
 If nodes taints are not removed:
