@@ -26,12 +26,7 @@ files:
 {{- if .nodePool.users }}
 users:
 {{- range .nodePool.users }}
-- name: {{ .name | quote }}
-  sshAuthorizedKeys:
-  {{- range .sshAuthorizedKeys }}
-  - {{ . | quote }}
-  {{- end }}
-  sudo: {{ .sudo | quote }}
+  - {{- toYaml . | nindent 4 }}
 {{- end }}
 {{- end }}
 {{- end -}}

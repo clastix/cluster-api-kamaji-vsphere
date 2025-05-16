@@ -169,14 +169,22 @@ nodePools:
     # gateway: ""
     # -- users to create on machines
     users:
+      # -- username to create
     - name: ubuntu
+      # -- SSH shell to use
+      shell: /bin/bash
+      # -- SSH password to use. Use mkpasswd -m sha-512 to generate the password
+      # passwd: "$6$E0UW ..."
+      # -- Lock login password
+      lockPassword: true
+      # -- SSH public key to add
       sshAuthorizedKeys: []
+      # -- sudoers configuration
       sudo: ALL=(ALL) NOPASSWD:ALL
     # -- Labels to add to the node pool when joining the cluster
     # labels: "node.kubernetes.io/node=foo"
     # -- Taints to add to the node pool when joining the cluster
     # taints: "node.kubernetes.io/node:NoSchedule"
-
 vSphereCloudControllerManager:
   # -- Installs vsphere-cloud-controller-manager on the management cluster
   enabled: true

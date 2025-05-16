@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
+![Version: 0.2.2](https://img.shields.io/badge/Version-0.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -73,7 +73,12 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].staticRoutes | list | `[]` | Static network routes if required |
 | nodePools[0].storagePolicyName | string | `""` | VSphere storage policy to use |
 | nodePools[0].template | string | `"ubuntu-2204-kube-v1.32.0"` | VSphere template to clone |
-| nodePools[0].users | list | `[{"name":"ubuntu","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]` | users to create on machines |
+| nodePools[0].users | list | `[{"lockPassword":true,"name":"ubuntu","shell":"/bin/bash","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]` | users to create on machines |
+| nodePools[0].users[0] | object | `{"lockPassword":true,"name":"ubuntu","shell":"/bin/bash","sshAuthorizedKeys":[],"sudo":"ALL=(ALL) NOPASSWD:ALL"}` | username to create |
+| nodePools[0].users[0].lockPassword | bool | `true` | Lock login password |
+| nodePools[0].users[0].shell | string | `"/bin/bash"` | SSH shell to use |
+| nodePools[0].users[0].sshAuthorizedKeys | list | `[]` | SSH public key to add |
+| nodePools[0].users[0].sudo | string | `"ALL=(ALL) NOPASSWD:ALL"` | sudoers configuration |
 | vSphere.dataCenter | string | `"datacenter"` | Datacenter to use |
 | vSphere.identityRef | object | `{"name":"vsphere-secret","type":"Secret"}` | VSphere Identity Management |
 | vSphere.identityRef.name | string | `"vsphere-secret"` | Specifies the name of the VSphereClusterIdentity or Secret |
