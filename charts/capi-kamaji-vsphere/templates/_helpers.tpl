@@ -13,7 +13,4 @@
 {{- .Values.vSphereCloudControllerManager.secret.name | default "vsphere-config-secret" -}}
 {{- end -}}
 
-{{/* CSI vSphere config secret name used by CSI */}}
-{{- define "cluster-api-kamaji-vsphere.csi-config-secret-name" -}}
-{{- .Values.vSphereStorageControllerManager.secret.name | default "csi-config-secret" -}}
-{{- end -}}
+

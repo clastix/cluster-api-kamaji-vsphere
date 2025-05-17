@@ -9,6 +9,8 @@ vSphere:
   insecure: false
   # -- VSphere https TLS thumbprint
   tlsThumbprint: ""
+  # -- Path to the CA file if it has been mounted into the pod.
+  caFile: ""
   # -- VSphere Identity Management
   identityRef:
     # -- Specifies whether use VSphereClusterIdentity or Secret
@@ -124,7 +126,7 @@ nodePools:
     # -- VSphere storage policy to use
     storagePolicyName: ""
     # -- VSphere template to clone
-    template: "ubuntu-2204-kube-v1.32.0"
+    template: "ubuntu-2404-kube-v1.32.0"
     # -- VSphere network for VMs and CSI
     network: "network"
     # -- Number of worker VMs instances
@@ -186,10 +188,38 @@ nodePools:
     # -- Taints to add to the node pool when joining the cluster
     # taints: "node.kubernetes.io/node:NoSchedule"
 vSphereCloudControllerManager:
-  # -- Installs vsphere-cloud-controller-manager on the management cluster
-  enabled: true
+  # -- Labels for toplogy regions and zones
+  topology: 
+    region: "k8s-region"
+    zone: "k8s-zone"
+  # -- Image of the vsphere-cloud-controller-manager to install. 
+  image:
+     # -- Set the image registry
+    registry: registry.k8s.io
+    # -- Set the image repository
+    repository: cloud-pv-vsphere/cloud-provider-vsphere
+    # -- The tag should be equivalent to the upstream Kubernetes version.
+    tag: v1.32.0
+    # -- Set the image pull policy.
+    pullPolicy: IfNotPresent
   secret:
-    # -- The name of an existing Secret for vSphere. 
+    # -- The name of an existing Secret to access the vCenter API
     name: vsphere-config-secret
-  # -- Version of the vsphere-cloud-controller-manager to install. The major and minor versions of releases should be equivalent to the compatible upstream Kubernetes release.
-  version: v1.32.0
+    # -- Additional metadata as labels and annotations
+  additionalMetadata: 
+    labels: {}
+    annotations: {}
+  # -- Pods Additional metadata as labels and annotations
+  podAdditionalMetadata:
+    labels: {}
+    annotations: {}
+  # -- Affinity scheduling rules
+  affinity: {}
+  # -- Tolerations for scheduling
+  tolerations: []
+  # -- NodeSelector for scheduling
+  nodeSelector:
+    kubernetes.io/os: linux
+  # -- TopologySpreadConstraints for scheduling
+  topologySpreadConstraints: []
+
