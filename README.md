@@ -91,11 +91,9 @@ This command installs the Cluster Autoscaler and configures it to manage the wor
 
 ## Prerequisites
 
-- Kubernetes 1.28+
 - Kamaji installed and configured
-- Cluster API with vSphere provider
-- IPAM provider (optional)
-- Helm 3.x
+- Cluster API vSphere provider installed and configured
+- Cluster API IPAM provider installed and configure (optional)
 - Access to vSphere environment
 
 ## Installation
@@ -106,7 +104,7 @@ helm repo add clastix https://clastix.github.io/charts
 helm repo update
 
 # Install with custom values
-helm install cluster-name clastix/capi-kamaji-vsphere -f my-values.yaml
+helm install cluster-name clastix/capi-kamaji-vsphere -f values.yaml
 ```
 
 ## Credentials Management
@@ -134,7 +132,7 @@ metadata:
     cluster.x-k8s.io/cluster-name: "cluster-name"
 stringData:
   username: "administrator@vsphere.local"
-  password: "YOUR_PASSWORD"
+  password: "password"
 EOF
 ```
 
@@ -152,14 +150,13 @@ stringData:
   vsphere.conf: |
     global:
       port: 443
-      insecure-flag: false
-      password: "YOUR_PASSWORD"
+      insecureFlag: false
+      password: "password"
       user: "administrator@vsphere.local"
-      thumbprint: "YOUR_VCENTER_THUMBPRINT"
     vcenter:
       vcenter.example.com:
         datacenters:
-        - "YOUR_DATACENTER"
+        - "datacenter-name"
         server: "vcenter.example.com"
 EOF
 ```
@@ -177,11 +174,9 @@ kind: Secret
 metadata:
   name: vsphere-secret
   namespace: capv-system
-  labels:
-    cluster.x-k8s.io/cluster-name: "cluster-name"
 stringData:
   username: "administrator@vsphere.local"
-  password: "YOUR_PASSWORD"
+  password: "password"
 EOF
 ```
 
@@ -199,8 +194,8 @@ spec:
   allowedNamespaces:
     selector:
       matchLabels: {} # allow all namespaces
+EOF
 ```
-
 
 ```yaml
 # Create the vsphere-config-secret for Cloud Controller Manager
@@ -217,13 +212,12 @@ stringData:
     global:
       port: 443
       insecure-flag: false
-      password: "YOUR_PASSWORD"
+      password: "password"
       user: "administrator@vsphere.local"
-      thumbprint: "YOUR_VCENTER_THUMBPRINT"
     vcenter:
       vcenter.example.com:
         datacenters:
-        - "YOUR_DATACENTER"
+        - "datacenter-name"
         server: "vcenter.example.com"
 EOF
 ```
@@ -253,7 +247,9 @@ nodePools:
   - name: default
     template: "ubuntu-2204-kube-v1.32.0"
 vSphereCloudControllerManager:
-  version: "v1.32.0"
+  image:
+    tag: "v1.32.0"
+
 
 # Apply upgrade
 helm upgrade cluster-name ./cluster-api-kamaji-vsphere -f values.yaml
@@ -297,12 +293,14 @@ kubectl wait --for=delete vspheremachines -l cluster.x-k8s.io/cluster-name=clust
 helm uninstall cluster-name
 ```
 
-If nodes taints are not removed:
+If nodes taints are not removed, check Cloud Controller Manager logs:
 
 ```bash
 # Check CPI Controller logs
 kubectl logs -l component=cloud-controller-manager
 ```
+
+Most of the time the issue is related to authentication issues with vSphere credentials. Check the secret used by the `VSphereClusterIdentity` or `VSphereCluster` and ensure that the credentials are correct.
 
 ## Configuration
 

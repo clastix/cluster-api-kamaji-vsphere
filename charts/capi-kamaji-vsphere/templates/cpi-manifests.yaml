@@ -1,5 +1,3 @@
-{{- if .Values.vSphereCloudControllerManager.enabled }}
----
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -36,6 +34,13 @@ metadata:
   labels:
     component: cloud-controller-manager
     cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . | quote }}
+    {{- with .Values.vSphereCloudControllerManager.additionalMetadata.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.vSphereCloudControllerManager.additionalMetadata.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   name: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-vsphere-cloud-controller-manager
   namespace: {{ .Release.Namespace }}
 spec:
@@ -48,10 +53,18 @@ spec:
       labels:
         component: cloud-controller-manager
         app: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-vsphere-cloud-controller-manager
+        {{- with .Values.vSphereCloudControllerManager.podAdditionalMetadata.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- with .Values.vSphereCloudControllerManager.podAdditionalMetadata.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       containers:
         - name: vsphere-cloud-controller-manager
-          image: registry.k8s.io/cloud-pv-vsphere/cloud-provider-vsphere:{{ .Values.vSphereCloudControllerManager.version }}
+          image: {{ .Values.vSphereCloudControllerManager.image.registry }}/{{ .Values.vSphereCloudControllerManager.image.repository }}:{{ .Values.vSphereCloudControllerManager.image.tag }}
+          imagePullPolicy: {{ .Values.vSphereCloudControllerManager.image.pullPolicy }}
           args:
             - --v=2
             - --cloud-config=/etc/cloud/vsphere.conf
@@ -71,6 +84,22 @@ spec:
       hostNetwork: false
       securityContext:
         runAsUser: 1001
+      affinity:
+        {{- with .Values.vSphereCloudControllerManager.affinity }}
+        {{- toYaml . | nindent 6 }}
+        {{- end }}
+      tolerations:
+        {{- with .Values.vSphereCloudControllerManager.tolerations }}
+        {{- toYaml . | nindent 6 }}
+        {{- end }}
+      nodeSelector:
+        {{- with .Values.vSphereCloudControllerManager.nodeSelector }}
+        {{- toYaml . | nindent 6 }}
+        {{- end }}
+      topologySpreadConstraints:
+        {{- with .Values.vSphereCloudControllerManager.topologySpreadConstraints }}
+        {{- toYaml . | nindent 6 }}
+        {{- end }}
       serviceAccountName: {{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-cloud-controller-manager
       volumes:
         - name: vsphere-config-volume
@@ -79,4 +108,4 @@ spec:
         - name: '{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig'
           secret:
             secretName: '{{ include "cluster-api-kamaji-vsphere.cluster-name" . }}-admin-kubeconfig'
-{{- end }}
+            
