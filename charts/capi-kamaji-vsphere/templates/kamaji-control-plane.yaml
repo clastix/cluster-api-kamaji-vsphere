@@ -66,10 +66,12 @@ spec:
       {{- end }}
   kubelet:
     cgroupfs: {{ .Values.cluster.controlPlane.kubelet.cgroupfs | quote }}
+    {{- if .Values.cluster.controlPlane.kubelet.preferredAddressTypes }}
     preferredAddressTypes:
       {{- range .Values.cluster.controlPlane.kubelet.preferredAddressTypes }}
       - {{ . | quote }}
       {{- end }}
+    {{- end }}
   network:
     serviceAddress: {{ .Values.cluster.controlPlane.network.serviceAddress | quote }}
     serviceType: {{ .Values.cluster.controlPlane.network.serviceType | quote }}

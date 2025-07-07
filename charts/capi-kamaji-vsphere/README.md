@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.2.3](https://img.shields.io/badge/Version-0.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
+![Version: 0.2.4](https://img.shields.io/badge/Version-0.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -38,7 +38,6 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | cluster.controlPlane.deployment.tolerations | list | `[]` | Tolerations for scheduling |
 | cluster.controlPlane.deployment.topologySpreadConstraints | list | `[]` | TopologySpreadConstraints for scheduling |
 | cluster.controlPlane.kubelet.cgroupfs | string | `"systemd"` | kubelet cgroupfs configuration |
-| cluster.controlPlane.kubelet.preferredAddressTypes | list | `["InternalIP","ExternalIP","Hostname"]` | kubelet preferredAddressTypes order |
 | cluster.controlPlane.labels | object | `{"cni":"calico"}` | Labels to add to the control plane |
 | cluster.controlPlane.network.certSANs | list | `[]` | List of additional Subject Alternative Names to use for the API Server serving certificate |
 | cluster.controlPlane.network.serviceAddress | string | `""` | Address used to expose the Kubernetes API server. If not set, the service will be exposed on the first available address. |
