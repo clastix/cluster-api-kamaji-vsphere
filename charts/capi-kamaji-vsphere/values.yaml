@@ -91,10 +91,7 @@ cluster:
       # -- kubelet cgroupfs configuration
       cgroupfs: systemd
       # -- kubelet preferredAddressTypes order
-      preferredAddressTypes:
-        - InternalIP
-        - ExternalIP
-        - Hostname
+      # preferredAddressTypes: []
     network:
       # -- Ingress configuration (optional)
       # ingress: {}
