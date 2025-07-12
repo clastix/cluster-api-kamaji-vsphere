@@ -94,7 +94,7 @@ spec:
         {{- end }}
       nodeSelector:
         {{- with .Values.vSphereCloudControllerManager.nodeSelector }}
-        {{- toYaml . | nindent 6 }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       topologySpreadConstraints:
         {{- with .Values.vSphereCloudControllerManager.topologySpreadConstraints }}
