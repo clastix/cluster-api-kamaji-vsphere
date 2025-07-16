@@ -211,7 +211,7 @@ stringData:
   vsphere.conf: |
     global:
       port: 443
-      insecure-flag: false
+      insecureFlag: false
       password: "password"
       user: "administrator@vsphere.local"
     vcenter:
