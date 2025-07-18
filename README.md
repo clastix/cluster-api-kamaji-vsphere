@@ -150,7 +150,7 @@ stringData:
   vsphere.conf: |
     global:
       port: 443
-      insecureFlag: false
+      insecureFlag: true # use for selfsigned certificates
       password: "password"
       user: "administrator@vsphere.local"
     vcenter:
@@ -211,7 +211,7 @@ stringData:
   vsphere.conf: |
     global:
       port: 443
-      insecureFlag: false
+      insecureFlag: true # use for selfsigned certificates
       password: "password"
       user: "administrator@vsphere.local"
     vcenter:
