@@ -11,11 +11,6 @@ metadata:
   {{- end }}
   {{- end }}
   labels:
-    {{- with .autoscaling }}
-    {{- if .enabled }}
-    {{- .labels | toYaml | nindent 4 }}
-    {{- end }}
-    {{- end }}
     cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
   name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ }}-{{ .name }}-md
   namespace: {{ $.Release.Namespace }}
@@ -27,11 +22,6 @@ spec:
   template:
     metadata:
       labels:
-        {{- with .autoscaling }}
-        {{- if .enabled }}
-        {{- .labels | toYaml | nindent 8 }}
-        {{- end }}
-        {{- end }}
         cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
     spec:
       bootstrap:
