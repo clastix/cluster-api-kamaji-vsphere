@@ -140,9 +140,6 @@ nodePools:
     autoscaling:
       # -- Enable autoscaling
       enabled: false
-      labels:
-        # -- Labels to use for autoscaling: make sure to use the same labels on the autoscaler configuration
-        autoscaling: "enabled"
       # -- Minimum number of instances in the pool
       minSize: "2"
       # -- Maximum number of instances in the pool

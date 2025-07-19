@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.2.5](https://img.shields.io/badge/Version-0.2.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
+![Version: 0.2.6](https://img.shields.io/badge/Version-0.2.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -59,7 +59,6 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].addressesFromPools | object | `{"enabled":true}` | Use an IPAMProvider pool to reserve IPs |
 | nodePools[0].addressesFromPools.enabled | bool | `true` | Enable the IPAMProvider usage |
 | nodePools[0].autoscaling.enabled | bool | `false` | Enable autoscaling |
-| nodePools[0].autoscaling.labels.autoscaling | string | `"enabled"` | Labels to use for autoscaling: make sure to use the same labels on the autoscaler configuration |
 | nodePools[0].autoscaling.maxSize | string | `"6"` | Maximum number of instances in the pool |
 | nodePools[0].autoscaling.minSize | string | `"2"` | Minimum number of instances in the pool |
 | nodePools[0].dataStore | string | `"datastore"` | VSphere datastore to use |

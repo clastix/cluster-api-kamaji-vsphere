@@ -68,11 +68,9 @@ nodePools:
       enabled: true
       minSize: 2
       maxSize: 6
-      labels:
-        autoscaling: "enabled"
 ```
 
-This configuration marks the node pool for autoscaling. The Cluster Autoscaler will use these settings to scale the node pool within the specified limits.
+This configuration marks the node pool for autoscaling. The Cluster Autoscaler will use these settings to scale the node pool within the specified limits. There are sever criteria for selecting the cluster autoscaler, including labels, cluster name, and namespace. Refer to the [Cluster Autoscaler documentation](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/README.md)
 
 You need to install the Cluster Autoscaler in the management cluster. Here is an example using Helm:
 
@@ -81,13 +79,14 @@ helm repo add autoscaler https://kubernetes.github.io/autoscaler
 helm repo update
 helm upgrade --install ${CLUSTER_NAME}-autoscaler autoscaler/cluster-autoscaler \
     --set cloudProvider=clusterapi \
-    --set autodiscovery.namespace=default \
-    --set "autoDiscovery.labels[0].autoscaling=enabled" \
+    --set autoDiscovery.namespace=default \
+    --set autoDiscovery.labels[0].foo=bar \
+    --set autoDiscovery.clusterName=${CLUSTER_NAME} \
     --set clusterAPIKubeconfigSecret=${CLUSTER_NAME}-kubeconfig \
     --set clusterAPIMode=kubeconfig-incluster
 ```
 
-This command installs the Cluster Autoscaler and configures it to manage the workload cluster from the management cluster.
+This command installs the Cluster Autoscaler and configures it to manage the workload cluster from the management cluster. In the example above, cluster selection is done using the `autoDiscovery` feature, which matches the labels set in the node pool configuration, namespace, and cluster name.
 
 ## Prerequisites
 
