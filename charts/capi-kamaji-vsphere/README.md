@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.2.6](https://img.shields.io/badge/Version-0.2.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
+![Version: 0.2.7](https://img.shields.io/badge/Version-0.2.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -83,9 +83,9 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].users[0].sudo | string | `"ALL=(ALL) NOPASSWD:ALL"` | sudoers configuration |
 | vSphere.caFile | string | `""` | Path to the CA file if it has been mounted into the pod. |
 | vSphere.dataCenter | string | `"datacenter"` | Datacenter to use |
-| vSphere.identityRef | object | `{"name":"vsphere-secret","type":"Secret"}` | VSphere Identity Management |
-| vSphere.identityRef.name | string | `"vsphere-secret"` | Specifies the name of the VSphereClusterIdentity or Secret |
-| vSphere.identityRef.type | string | `"Secret"` | Specifies whether use VSphereClusterIdentity or Secret |
+| vSphere.identityRef | object | `{"name":"vsphere-cluster-identity","type":"VSphereClusterIdentity"}` | VSphere Identity Management |
+| vSphere.identityRef.name | string | `"vsphere-cluster-identity"` | Specifies the name of the VSphereClusterIdentity or Secret |
+| vSphere.identityRef.type | string | `"VSphereClusterIdentity"` | Specifies whether use VSphereClusterIdentity or Secret |
 | vSphere.insecure | bool | `false` | If vCenter uses a self-signed cert |
 | vSphere.port | int | `443` | VSphere server port |
 | vSphere.server | string | `"server.sample.org"` | VSphere server dns name or address |
