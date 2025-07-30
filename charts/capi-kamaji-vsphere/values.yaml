@@ -14,9 +14,9 @@ vSphere:
   # -- VSphere Identity Management
   identityRef:
     # -- Specifies whether use VSphereClusterIdentity or Secret
-    type: Secret
+    type: VSphereClusterIdentity
     # -- Specifies the name of the VSphereClusterIdentity or Secret
-    name: vsphere-secret
+    name: vsphere-cluster-identity
 
 ipamProvider:
   # -- Enable the IPAMProvider usage

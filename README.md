@@ -163,7 +163,7 @@ EOF
 ### Credentials through VSphereClusterIdentity
 The chart can also be configured to use `VSphereClusterIdentity` for managing vSphere credentials. This allows multiple clusters to share the same credentials.
 
-Deploy a secret with the credentials in the CAPV manager namespace (capv-system by default):
+Deploy a secret with the credentials in the CAPV manager namespace:
 
 ```yaml
 # Create the vsphere-secret for Cluster API
@@ -172,7 +172,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: vsphere-secret
-  namespace: capv-system
+  namespace: capv-system    # <<< CAPV manager namespace
 stringData:
   username: "administrator@vsphere.local"
   password: "password"
