@@ -194,6 +194,16 @@ nodePools:
     # labels: "node.kubernetes.io/node=foo"
     # -- Taints to add to the node pool when joining the cluster
     # taints: "node.kubernetes.io/node:NoSchedule"
+    # -- Pre kubeadm commands to run on the machines
+    preKubeadmCommands:
+    - hostnamectl set-hostname "{{ ds.meta_data.hostname }}"
+    - echo "::1         ipv6-localhost ipv6-loopback localhost6 localhost6.localdomain6" >/etc/hosts
+    - echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" >>/etc/hosts
+    # - echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+    # - sysctl -p
+    # -- Post kubeadm commands to run on the machines
+    postKubeadmCommands: []
+    # - echo "node joined" >> /var/log/cloud-init.log
 vSphereCloudControllerManager:
   # -- Labels for toplogy regions and zones
   topology: 

@@ -12,10 +12,18 @@ joinConfiguration:
       register-with-taints: {{ .nodePool.taints | quote }}
       {{- end }}
     name: "{{`{{ local_hostname }}`}}"
+{{- if .nodePool.preKubeadmCommands }}
 preKubeadmCommands:
-- hostnamectl set-hostname "{{`{{ ds.meta_data.hostname }}`}}"
-- echo "::1         ipv6-localhost ipv6-loopback localhost6 localhost6.localdomain6" >/etc/hosts
-- echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" >>/etc/hosts
+{{- range .nodePool.preKubeadmCommands }}
+  - {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- if .nodePool.postKubeadmCommands }}
+postKubeadmCommands:
+{{- range .nodePool.postKubeadmCommands }}
+  - {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 {{- if .nodePool.additionalCloudInitFiles }}
 files:
 - path: "/etc/cloud/cloud.cfg.d/99-custom.cfg"
