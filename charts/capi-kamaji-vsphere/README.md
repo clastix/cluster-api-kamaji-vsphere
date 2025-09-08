@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.2.7](https://img.shields.io/badge/Version-0.2.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
+![Version: 0.2.8](https://img.shields.io/badge/Version-0.2.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -70,6 +70,8 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].nameServers | list | `["8.8.8.8"]` | Nameservers for VMs DNS resolution if required |
 | nodePools[0].network | string | `"network"` | VSphere network for VMs and CSI |
 | nodePools[0].numCPUs | int | `2` | Number of vCPUs to allocate to worker instances |
+| nodePools[0].postKubeadmCommands | list | `[]` | Post kubeadm commands to run on the machines |
+| nodePools[0].preKubeadmCommands | list | `["hostnamectl set-hostname \"{{ ds.meta_data.hostname }}\"","echo \"::1         ipv6-localhost ipv6-loopback localhost6 localhost6.localdomain6\" >/etc/hosts","echo \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\" >>/etc/hosts"]` | Pre kubeadm commands to run on the machines |
 | nodePools[0].replicas | int | `3` | Number of worker VMs instances |
 | nodePools[0].resourcePool | string | `"*/Resources"` | VSphere resource pool to use |
 | nodePools[0].staticRoutes | list | `[]` | Static network routes if required |
