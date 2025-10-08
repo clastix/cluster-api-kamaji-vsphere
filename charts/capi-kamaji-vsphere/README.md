@@ -1,6 +1,6 @@
 # capi-kamaji-vsphere
 
-![Version: 0.2.8](https://img.shields.io/badge/Version-0.2.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
+![Version: 0.2.9](https://img.shields.io/badge/Version-0.2.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.32.0](https://img.shields.io/badge/AppVersion-1.32.0-informational?style=flat-square)
 
 A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API and Kamaji.
 
@@ -24,9 +24,10 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | cluster.clusterNetwork.pods.cidrBlocks | list | `["10.93.0.0/16"]` | CIDR range for pods |
 | cluster.clusterNetwork.serviceDomain | string | `"cluster.local"` | Service Domain for cluster DNS |
 | cluster.clusterNetwork.services.cidrBlocks | list | `["10.96.0.0/16"]` | CIDR range for services |
-| cluster.controlPlane.addons.coreDNS | object | `{}` | KamajiControlPlane coreDNS configuration |
-| cluster.controlPlane.addons.konnectivity | object | `{}` | KamajiControlPlane konnectivity configuration |
-| cluster.controlPlane.addons.kubeProxy | object | `{}` | KamajiControlPlane kube-proxy configuration |
+| cluster.controlPlane.addons | object | `{"coreDNS":{},"konnectivity":{},"kubeProxy":{}}` | Configure addons for the control plane |
+| cluster.controlPlane.addons.coreDNS | object | `{}` | CoreDNS addon configuration |
+| cluster.controlPlane.addons.konnectivity | object | `{}` | Konnectivity addon configuration |
+| cluster.controlPlane.addons.kubeProxy | object | `{}` | Kube-proxy addon configuration |
 | cluster.controlPlane.apiServer | object | `{"extraArgs":[]}` | extraArgs for the control plane components |
 | cluster.controlPlane.controllerManager.extraArgs[0] | string | `"--cloud-provider=external"` |  |
 | cluster.controlPlane.dataStoreName | string | `"default"` | KamajiControlPlane dataStoreName |
