@@ -17,6 +17,13 @@ metadata:
 spec:
   clusterName: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
   replicas: {{ .replicas }}
+  {{- if hasKey . "rolloutStrategy" }}
+  rollout:
+    strategy:
+      {{- with .rolloutStrategy }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- end }}
   selector:
     matchLabels: {}
   template:

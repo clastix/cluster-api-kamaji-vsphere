@@ -143,6 +143,15 @@ nodePools:
     network: "network"
     # -- Number of worker VMs instances
     replicas: 3
+    # -- Strategy to roll out control plane Machines
+    rolloutStrategy:
+      # -- Type of rollout. Allowed values are RollingUpdate and OnDelete
+      type: RollingUpdate
+      rollingUpdate:
+        # -- maxSurge is the maximum number of machines that can be scheduled above the desired number of machines
+        maxSurge: 1
+        # -- maxUnavailable is the maximum number of machines that can be unavailable during the update
+        maxUnavailable: 0
     autoscaling:
       # -- Enable autoscaling
       enabled: false
