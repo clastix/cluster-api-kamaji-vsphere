@@ -141,7 +141,7 @@ nodePools:
     template: "ubuntu-2404-kube-v1.32.0"
     # -- VSphere network for VMs and CSI
     network: "network"
-    # -- Number of worker VMs instances
+    # -- Number of worker VMs instances. Ignored when autoscaling is enabled: the Cluster Autoscaler manages the count, starting from minSize
     replicas: 3
     autoscaling:
       # -- Enable autoscaling

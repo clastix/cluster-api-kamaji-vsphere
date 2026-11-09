@@ -63,14 +63,15 @@ The Cluster Autoscaler runs in the management cluster, following the hosted cont
 ```yaml
 nodePools:
   - name: default
-    replicas: 3
     autoscaling:
       enabled: true
       minSize: 2
       maxSize: 6
 ```
 
-This configuration marks the node pool for autoscaling. The Cluster Autoscaler will use these settings to scale the node pool within the specified limits. There are sever criteria for selecting the cluster autoscaler, including labels, cluster name, and namespace. Refer to the [Cluster Autoscaler documentation](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/README.md)
+This configuration marks the node pool for autoscaling. The Cluster Autoscaler will use these settings to scale the node pool within the specified limits.
+
+When autoscaling is enabled, the chart doesn't set `replicas` on the `MachineDeployment` and ignores the node pool's `replicas` value. Otherwise every `helm upgrade` would reset the node count chosen by the Cluster Autoscaler. Cluster API defaults the field from the autoscaler annotations instead. A new node pool starts at `minSize`, and an existing one keeps its current size, clamped to the `minSize`/`maxSize` range. There are sever criteria for selecting the cluster autoscaler, including labels, cluster name, and namespace. Refer to the [Cluster Autoscaler documentation](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/README.md)
 
 You need to install the Cluster Autoscaler in the management cluster. Here is an example using Helm:
 

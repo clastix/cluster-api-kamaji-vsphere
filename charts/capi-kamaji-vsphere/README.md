@@ -73,7 +73,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].numCPUs | int | `2` | Number of vCPUs to allocate to worker instances |
 | nodePools[0].postKubeadmCommands | list | `[]` | Post kubeadm commands to run on the machines |
 | nodePools[0].preKubeadmCommands | list | `["hostnamectl set-hostname \"{{ ds.meta_data.hostname }}\"","echo \"::1         ipv6-localhost ipv6-loopback localhost6 localhost6.localdomain6\" >/etc/hosts","echo \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\" >>/etc/hosts"]` | Pre kubeadm commands to run on the machines |
-| nodePools[0].replicas | int | `3` | Number of worker VMs instances |
+| nodePools[0].replicas | int | `3` | Number of worker VMs instances. Ignored when autoscaling is enabled: the Cluster Autoscaler manages the count, starting from minSize |
 | nodePools[0].resourcePool | string | `"*/Resources"` | VSphere resource pool to use |
 | nodePools[0].staticRoutes | list | `[]` | Static network routes if required |
 | nodePools[0].storagePolicyName | string | `""` | VSphere storage policy to use |

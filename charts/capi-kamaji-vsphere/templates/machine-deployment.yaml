@@ -1,14 +1,13 @@
 {{- range .Values.nodePools }}
+{{- $autoscaling := .autoscaling | default dict }}
 ---
 kind: MachineDeployment
 apiVersion: cluster.x-k8s.io/v1beta1
 metadata:
-  {{- with .autoscaling }}
-  {{- if .enabled }}
+  {{- if $autoscaling.enabled }}
   annotations:
-    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: {{ .minSize | quote }}
-    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: {{ .maxSize | quote }}
-  {{- end }}
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: {{ $autoscaling.minSize | quote }}
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: {{ $autoscaling.maxSize | quote }}
   {{- end }}
   labels:
     cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
@@ -16,7 +15,17 @@ metadata:
   namespace: {{ $.Release.Namespace }}
 spec:
   clusterName: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
+  {{- /*
+  With autoscaling, replicas is left unset so Helm doesn't compete with the Cluster
+  Autoscaler for the field. If it were rendered, Helm 4 upgrades would fail with a
+  server-side apply conflict on .spec.replicas once the autoscaler has scaled the pool
+  (or reset the count with --force-conflicts), and Helm 3 would overwrite the count
+  whenever the replicas value changes. Cluster API defaults it from the min/max-size
+  annotations instead (min-size on create, current value clamped on update).
+  */}}
+  {{- if not $autoscaling.enabled }}
   replicas: {{ .replicas }}
+  {{- end }}
   selector:
     matchLabels: {}
   template:
