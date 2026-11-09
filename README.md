@@ -95,13 +95,13 @@ helm repo update
 helm upgrade --install ${CLUSTER_NAME}-autoscaler autoscaler/cluster-autoscaler \
     --set cloudProvider=clusterapi \
     --set autoDiscovery.namespace=default \
-    --set autoDiscovery.labels[0].foo=bar \
+    --set 'autoDiscovery.labels[0].foo=bar' \
     --set autoDiscovery.clusterName=${CLUSTER_NAME} \
     --set clusterAPIKubeconfigSecret=${CLUSTER_NAME}-kubeconfig \
     --set clusterAPIMode=kubeconfig-incluster
 ```
 
-This command installs the Cluster Autoscaler and configures it to manage the workload cluster from the management cluster. In the example above, cluster selection is done using the `autoDiscovery` feature, which matches the node pool's `autoscaling.labels`, the namespace and the cluster name.
+This command installs the Cluster Autoscaler and configures it to manage the workload cluster from the management cluster. In the example above, cluster selection is done using the `autoDiscovery` feature, which matches the node pool's `autoscaling.labels`, the namespace and the cluster name. Each entry in `autoDiscovery.labels` must match a key/value pair in a node pool's `autoscaling.labels`. When several entries are set, a node pool must carry all of them to be managed. With the example above, only node pools with `autoscaling.labels.foo: bar` are autoscaled.
 
 ## Prerequisites
 
