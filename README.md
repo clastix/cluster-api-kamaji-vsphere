@@ -67,11 +67,25 @@ nodePools:
       enabled: true
       minSize: 2
       maxSize: 6
+      labels:
+        foo: bar
 ```
 
-This configuration marks the node pool for autoscaling. The Cluster Autoscaler will use these settings to scale the node pool within the specified limits.
+This configuration marks the node pool for autoscaling. The Cluster Autoscaler will use these settings to scale the node pool within the specified limits. The Cluster Autoscaler selects node pools by several criteria, including labels, cluster name and namespace. The `autoscaling.labels` are set on the node pool's `MachineDeployment` so that the autoscaler's `autoDiscovery.labels` can match them. Refer to the [Cluster Autoscaler documentation](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/README.md)
 
-When autoscaling is enabled, the chart doesn't set `replicas` on the `MachineDeployment` and ignores the node pool's `replicas` value. Otherwise every `helm upgrade` would reset the node count chosen by the Cluster Autoscaler. Cluster API defaults the field from the autoscaler annotations instead. A new node pool starts at `minSize`, and an existing one keeps its current size, clamped to the `minSize`/`maxSize` range. There are sever criteria for selecting the cluster autoscaler, including labels, cluster name, and namespace. Refer to the [Cluster Autoscaler documentation](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/README.md)
+When autoscaling is enabled, the chart doesn't set `replicas` on the `MachineDeployment` and ignores the node pool's `replicas` value. Otherwise Helm and the Cluster Autoscaler would both manage the field. Once the autoscaler had scaled the pool, Helm 4 upgrades would fail with a server-side apply conflict on `.spec.replicas`, or reset the count when run with `--force-conflicts`. Helm 3 would overwrite the autoscaler's count whenever the `replicas` value changed. Cluster API defaults the field from the autoscaler annotations instead. A new node pool starts at `minSize`, and an existing one keeps its current size, clamped to the `minSize`/`maxSize` range.
+
+The chart also adds the Cluster Autoscaler's capacity annotations to the `MachineDeployment`. They describe the node that a new machine would become, which lets the autoscaler scale a node pool up from zero nodes (`minSize: 0`). The annotations are built from the node pool's own values:
+
+| Annotation | Node pool value | Example |
+| ---------- | --------------- | ------- |
+| `capacity.cluster-autoscaler.kubernetes.io/cpu` | `numCPUs` | `"2"` |
+| `capacity.cluster-autoscaler.kubernetes.io/memory` | `memoryMiB` | `"4096Mi"` |
+| `capacity.cluster-autoscaler.kubernetes.io/ephemeral-disk` | `diskGiB` | `"50Gi"` |
+| `capacity.cluster-autoscaler.kubernetes.io/labels` | `labels` (as passed to the kubelet `--node-labels`) | `"node-role/worker=true"` |
+| `capacity.cluster-autoscaler.kubernetes.io/taints` | `taints` (as passed to the kubelet `--register-with-taints`) | `"dedicated=gpu:NoSchedule"` |
+
+Whitespace is removed from the `labels` and `taints` values, because the Cluster Autoscaler doesn't trim them.
 
 You need to install the Cluster Autoscaler in the management cluster. Here is an example using Helm:
 
@@ -87,7 +101,7 @@ helm upgrade --install ${CLUSTER_NAME}-autoscaler autoscaler/cluster-autoscaler 
     --set clusterAPIMode=kubeconfig-incluster
 ```
 
-This command installs the Cluster Autoscaler and configures it to manage the workload cluster from the management cluster. In the example above, cluster selection is done using the `autoDiscovery` feature, which matches the labels set in the node pool configuration, namespace, and cluster name.
+This command installs the Cluster Autoscaler and configures it to manage the workload cluster from the management cluster. In the example above, cluster selection is done using the `autoDiscovery` feature, which matches the node pool's `autoscaling.labels`, the namespace and the cluster name.
 
 ## Prerequisites
 

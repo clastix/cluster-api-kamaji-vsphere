@@ -60,6 +60,7 @@ A Helm chart for deploying a Kamaji Tenant Cluster on vSphere using Cluster API 
 | nodePools[0].addressesFromPools | object | `{"enabled":true}` | Use an IPAMProvider pool to reserve IPs |
 | nodePools[0].addressesFromPools.enabled | bool | `true` | Enable the IPAMProvider usage |
 | nodePools[0].autoscaling.enabled | bool | `false` | Enable autoscaling |
+| nodePools[0].autoscaling.labels | object | `{}` | Labels added to the MachineDeployment, e.g. to match the Cluster Autoscaler autoDiscovery.labels |
 | nodePools[0].autoscaling.maxSize | string | `"6"` | Maximum number of instances in the pool |
 | nodePools[0].autoscaling.minSize | string | `"2"` | Minimum number of instances in the pool |
 | nodePools[0].dataStore | string | `"datastore"` | VSphere datastore to use |

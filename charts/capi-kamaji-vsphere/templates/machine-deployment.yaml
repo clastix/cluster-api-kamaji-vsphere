@@ -8,9 +8,36 @@ metadata:
   annotations:
     cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: {{ $autoscaling.minSize | quote }}
     cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: {{ $autoscaling.maxSize | quote }}
+    {{- /*
+    Scale-from-zero hints: they describe the node a new machine would become, so the
+    Cluster Autoscaler can simulate it while the pool has no nodes (cpu and memory are
+    the minimum it needs). Whitespace is stripped from labels and taints because the
+    autoscaler doesn't trim entries, unlike the kubelet flags: a taint with a stray
+    space is silently dropped.
+    */}}
+    {{- with .numCPUs }}
+    capacity.cluster-autoscaler.kubernetes.io/cpu: {{ . | int | quote }}
+    {{- end }}
+    {{- with .memoryMiB }}
+    capacity.cluster-autoscaler.kubernetes.io/memory: {{ printf "%dMi" (. | int) | quote }}
+    {{- end }}
+    {{- with .diskGiB }}
+    capacity.cluster-autoscaler.kubernetes.io/ephemeral-disk: {{ printf "%dGi" (. | int) | quote }}
+    {{- end }}
+    {{- with .labels }}
+    capacity.cluster-autoscaler.kubernetes.io/labels: {{ . | nospace | quote }}
+    {{- end }}
+    {{- with .taints }}
+    capacity.cluster-autoscaler.kubernetes.io/taints: {{ . | nospace | quote }}
+    {{- end }}
   {{- end }}
   labels:
     cluster.x-k8s.io/cluster-name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ | quote }}
+    {{- if $autoscaling.enabled }}
+    {{- with $autoscaling.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- end }}
   name: {{ include "cluster-api-kamaji-vsphere.cluster-name" $ }}-{{ .name }}-md
   namespace: {{ $.Release.Namespace }}
 spec:

@@ -146,6 +146,8 @@ nodePools:
     autoscaling:
       # -- Enable autoscaling
       enabled: false
+      # -- Labels added to the MachineDeployment, e.g. to match the Cluster Autoscaler autoDiscovery.labels
+      labels: {}
       # -- Minimum number of instances in the pool
       minSize: "2"
       # -- Maximum number of instances in the pool
